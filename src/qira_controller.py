@@ -2,8 +2,7 @@ import subprocess
 import time
 from enum import Enum
 
-import keyboard
-import mouse
+import pyautogui
 import pygetwindow as gw
 import requests
 
@@ -22,6 +21,8 @@ class Trampoline(Enum):
 
     ONE = 1
     TWO = 2
+    ONETWO = 12
+    AUTO = 0
 
 
 class QiraControllerError(Exception):
@@ -30,14 +31,17 @@ class QiraControllerError(Exception):
 
 class QiraController:
 
-    WINDOW_SIZE = (720, 480)
+    WINDOW_SIZE = (1600, 855)
     WINDOW_POSITION = (0, 0)
-    TRAMPOLINE_SELECTOR_POSITION = (-1, -1)  # TODO: find out these positions
-    TRAMPOLINE_1_POSITION = (-1, -1)
-    TRAMPOLINE_2_POSITION = (-1, -1)
+    TRAMPOLINE_SELECTOR_POSITION = (240, 200)  # positions on a 1600x900 tn panel
+    TRAMPOLINE_1_POSITION = (240, 225)
+    TRAMPOLINE_2_POSITION = (240, 245)
+    TRAMPOLINE_12_POSITION = (240, 260)
+    TRAMPOLINE_AUTO_POSITION = (240, 280)
 
     URL = '127.0.0.1:8080'
     EXE_PATH = 'C:\Program Files (x86)\Qira\Qira.exe'
+    WINDOW_TITLE = 'Qira v2.1.0'
 
     def __init__(self, exe_path, window_title, url):
         self._exe_path = exe_path
@@ -48,10 +52,10 @@ class QiraController:
         self._state = State.TERMINATED
 
     def _is_proc_running(self):
-        return self._proc is None or self._proc.returncode is not None:
+        return self._proc is not None and self._proc.returncode is None
 
-    def _window_exists(self, function, *args, **kwargs):
-        return self._window and self._window_title in gw.getAllTitles():
+    def _window_exists(self):
+        return self._window and self._window_title in gw.getAllTitles()
 
     def _position_window(self):
         if not self._is_proc_running():
@@ -71,29 +75,7 @@ class QiraController:
             raise QiraControllerError("No Qira window found.")
 
         self._window.activate()
-        print("Press space")
-
-    def _select_trampoline(self, trampoline):
-        if not self._is_proc_running():
-            raise QiraControllerError("No Qira process running.")
-
-        if not self._window_exists():
-            raise QiraControllerError("No Qira window found.")
-
-        self._position_window()
-        self._window.activate()
-        mouse.move(*self.TRAMPOLINE_SELECTOR_POSITION)
-        mouse.click()
-        time.sleep(.01)
-
-        if trampoline == Trampoline.ONE:
-            mouse.move(*self.TRAMPOLINE_1_POSITION)
-            mouse.click()
-        elif trampoline == Trampoline.TWO:
-            mouse.move(*self.TRAMPOLINE_2_POSITION)
-            mouse.click()
-        else:
-            raise QiraControllerError("Invalid argument: trampoline must be in enum Trampoline")
+        pyautogui.press(' ')
 
     def _detect_state(self):
         if not self._is_proc_running():
@@ -106,7 +88,7 @@ class QiraController:
 
     def launch(self):
         if not self._is_proc_running():
-            self._proc = subporcess.Popen(self._exe)
+            self._proc = subprocess.Popen(self._exe_path)
 
             t = 0
             timeout = 10
@@ -117,8 +99,8 @@ class QiraController:
             if not t < timeout:
                 raise QiraControllerError("Could not acquire Qira window.")
             else:
-                self._window = gw.getWindowWithTitle(self._window_title)
-                self._state = State.LAUNCHED
+                self._window = gw.getWindowsWithTitle(self._window_title)[0]
+                self._state = State.READY
         else:
             raise QiraControllerError("Qira is already running.")
 
@@ -147,6 +129,32 @@ class QiraController:
         data = {'firstname': firstname, 'lastname': lastname}
         requests.post(f'{url}/routinemeta', data=data)  # TODO: add error handling
 
+    def select_trampoline(self, trampoline):
+        if not self._is_proc_running():
+            raise QiraControllerError("No Qira process running.")
+
+        if not self._window_exists():
+            raise QiraControllerError("No Qira window found.")
+
+        if self._state != State.READY
+            raise QiraControllerError("Can only select trampoline in {State.READY}.")
+
+        self._position_window()
+        self._window.activate()
+        # maybe init the controller with the positions directly
+        pyautogui.click(*self.TRAMPOLINE_SELECTOR_POSITION)
+
+        if trampoline == Trampoline.ONE:
+            pyautogui.click(*self.TRAMPOLINE_1_POSITION)
+        elif trampoline == Trampoline.TWO:
+            pyautogui.click(*self.TRAMPOLINE_2_POSITION)
+        elif trampoline == Trampoline.ONETWO:
+            pyautogui.click(*self.TRAMPOLINE_12_POSITION)
+        elif trampoline == Trampoline.AUTO:
+            pyautogui.click(*self.TRAMPOLINE_AUTO_POSITION)
+        else:
+            raise QiraControllerError("Invalid argument: trampoline must be in enum Trampoline.")
+
     #
     # transition functions
     #
@@ -165,7 +173,7 @@ class QiraController:
     def start(self):
         # set state START
         if self._state == State.READY:
-            self._press_sapce()
+            self._press_space()
             self._state = State.START
         else:
             raise QiraControllerError(f"Cannot transition from {self._state} to {State.START}.")
@@ -173,7 +181,7 @@ class QiraController:
     def routine(self):
         # set state ROUTINE
         if self._state == State.START:
-            self._press_sapce()
+            self._press_space()
             self._state = State.ROUTINE
         else:
             raise QiraControllerError(f"Cannot transition from {self._state} to {State.ROUTINE}.")
@@ -181,6 +189,7 @@ class QiraController:
     def review(self):
         # set state REVIEW
         if self._state == State.ROUTINE:
+            self._press_space()
             self._state = State.REVIEW
         else:
             raise QiraControllerError(f"Cannot transition from {self._state} to {State.REVIEW}.")

@@ -1,10 +1,10 @@
 import cv2
-import keyboard
+import pyautogui
 
 class CameraController:
 
     CAMERA_INDEX = 1
-    STOP_KEY = ' '
+    STOP_KEY = 'r'
 
     FOURCC = 'XVID'
     FPS = 60.
@@ -36,4 +36,4 @@ class CameraController:
 
     def stop(self):
         if self._is_recording:
-            keyboard.press_and_release(self._stop_key)
+            pyautogui.press(self._stop_key)
