@@ -35,13 +35,13 @@ def test_run(qc, tramp):
     qc.ready()
 
 
-def test_run_2(qc, tramp):
+def test_run_2(qc, tramp1, tramp2):
     print("Ready")
     qc.ready()
     print("Send routine meta Testy McTest")
     qc.send_routine_meta('Testy', 'McTest')
     print("Select trampoline")
-    qc.select_trampoline(tramp)
+    qc.select_trampoline(tramp1)
     print("Start")
     qc.start()
     sleep(5)
@@ -57,7 +57,7 @@ def test_run_2(qc, tramp):
     print("Send routine meta Fancy Test")
     qc.send_routine_meta('Fancy', 'Test')
     print("Select trampoline")
-    qc.select_trampoline(tramp)
+    qc.select_trampoline(tramp2)
     print("Start")
     qc.start()
     sleep(5)
