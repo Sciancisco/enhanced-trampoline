@@ -133,7 +133,9 @@ class QiraController:
             raise QiraControllerErro("No Qira process running.")
 
         data = {'firstname': firstname, 'lastname': lastname}
-        requests.post(f'http://{self._address}/routinemeta', json=data)
+        response = requests.post(f'http://{self._address}/routinemeta', json=data)
+        if not response.ok:
+            raise QiraControllerError(f"An error occured while sending routine meta: {response.status_code} - {response.reason}")
 
     def select_trampoline(self, trampoline):
         if not self._is_proc_running():
