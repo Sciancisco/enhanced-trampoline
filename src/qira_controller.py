@@ -121,6 +121,9 @@ class QiraController:
         if not self._is_proc_running():
             raise QiraControllerError("No process found.")
 
+        if not self._window_exists():
+            raise QiraControllerError("No window found.")
+
         if self._window:
             self._window.close()
             while self._window_title in gw.getAllTitles():
@@ -167,6 +170,12 @@ class QiraController:
     # transition functions
     #
     def ready(self):
+        if not self._is_proc_running():
+            raise QiraControllerError("No process found.")
+
+        if not self._window_exists():
+            raise QiraControllerError("No window found.")
+
         # set state READY
         if self._state == State.READY:
             self._window.activate()
@@ -179,6 +188,12 @@ class QiraController:
             raise QiraControllerError(f"Cannot transition from {self._state} to {State.READY}.")
 
     def start(self):
+        if not self._is_proc_running():
+            raise QiraControllerError("No process found.")
+
+        if not self._window_exists():
+            raise QiraControllerError("No window found.")
+
         # set state START
         if self._state == State.READY:
             self._press_space()
@@ -187,6 +202,12 @@ class QiraController:
             raise QiraControllerError(f"Cannot transition from {self._state} to {State.START}.")
 
     def routine(self):
+        if not self._is_proc_running():
+            raise QiraControllerError("No process found.")
+
+        if not self._window_exists():
+            raise QiraControllerError("No window found.")
+
         # set state ROUTINE
         if self._state == State.START:
             self._press_space()
@@ -195,6 +216,12 @@ class QiraController:
             raise QiraControllerError(f"Cannot transition from {self._state} to {State.ROUTINE}.")
 
     def review(self):
+        if not self._is_proc_running():
+            raise QiraControllerError("No process found.")
+
+        if not self._window_exists():
+            raise QiraControllerError("No window found.")
+
         # set state REVIEW
         if self._state == State.ROUTINE:
             self._press_space()
