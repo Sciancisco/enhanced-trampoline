@@ -81,7 +81,7 @@ class QiraController:
 
     def _detect_state(self):
         if not self._window_exists():
-            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
+            raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
         # TODO ?
         raise NotImplementedError("Not implemented yet.")
 
@@ -113,7 +113,7 @@ class QiraController:
         if self._state == State.CLOSED:
             raise QiraControllerError("Qira is not running.")
         if not self._window_exists():
-            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
+            raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         data = {'firstname': firstname, 'lastname': lastname}
         response = requests.post(f'http://{self._address}/routinemeta', json=data)
@@ -122,7 +122,7 @@ class QiraController:
 
     def select_trampoline(self, trampoline):
         if not self._window_exists():
-            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
+            raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         if self._state != State.READY:
             raise QiraControllerError(f"Can only select trampoline in {State.READY}.")
@@ -152,7 +152,7 @@ class QiraController:
 
     def ready(self):
         if not self._window_exists():
-            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
+            raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         # set state READY
         if self._state == State.READY:
@@ -167,7 +167,7 @@ class QiraController:
 
     def start(self):
         if not self._window_exists():
-            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
+            raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         # set state START
         if self._state == State.READY:
@@ -178,7 +178,7 @@ class QiraController:
 
     def routine(self):
         if not self._window_exists():
-            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
+            raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         # set state ROUTINE
         if self._state == State.START:
@@ -189,7 +189,7 @@ class QiraController:
 
     def review(self):
         if not self._window_exists():
-            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
+            raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         # set state REVIEW
         if self._state == State.ROUTINE:
