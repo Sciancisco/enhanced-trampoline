@@ -169,7 +169,7 @@ class QiraController:
     def ready(self):
         # set state READY
         if self._state == State.READY:
-            pass
+            self._window.activate()
 
         elif self._state == State.REVIEW:
             self._press_space()
