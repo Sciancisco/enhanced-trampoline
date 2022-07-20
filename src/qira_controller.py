@@ -63,6 +63,7 @@ class QiraController:
             return True
         else:
             self._window = None
+            self._state = State.CLOSED
             return False
 
     def _position_window(self):
