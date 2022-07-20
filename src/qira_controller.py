@@ -39,14 +39,14 @@ class QiraController:
     TRAMPOLINE_12_POSITION = (240, 260)
     TRAMPOLINE_AUTO_POSITION = (240, 280)
 
-    URL = '127.0.0.1:8080'
+    ADDRESS = '127.0.0.1:8080'
     EXE_PATH = 'C:\Program Files (x86)\Qira\Qira.exe'
     WINDOW_TITLE = 'Qira v2.1.0'
 
-    def __init__(self, exe_path, window_title, url):
+    def __init__(self, exe_path, window_title, address):
         self._exe_path = exe_path
         self._window_title = window_title
-        self._url = url
+        self._address = address
         self._proc = None
         self._window = None
         self._state = State.TERMINATED
@@ -114,7 +114,7 @@ class QiraController:
 
     def close(self):
         if not self._is_proc_running():
-            raise QiraControlerError("No process found.")
+            raise QiraControllerError("No process found.")
 
         if self._window:
             self._window.close()
@@ -127,7 +127,7 @@ class QiraController:
             raise QiraControllerErro("No Qira process running.")
 
         data = {'firstname': firstname, 'lastname': lastname}
-        requests.post(f'{url}/routinemeta', data=data)  # TODO: add error handling
+        requests.post(f'http://{self._address}/routinemeta', json=data)
 
     def select_trampoline(self, trampoline):
         if not self._is_proc_running():
@@ -136,13 +136,14 @@ class QiraController:
         if not self._window_exists():
             raise QiraControllerError("No Qira window found.")
 
-        if self._state != State.READY
-            raise QiraControllerError("Can only select trampoline in {State.READY}.")
+        if self._state != State.READY:
+            raise QiraControllerError(f"Can only select trampoline in {State.READY}.")
 
         self._position_window()
         self._window.activate()
         # maybe init the controller with the positions directly
         pyautogui.click(*self.TRAMPOLINE_SELECTOR_POSITION)
+        time.sleep(.3)
 
         if trampoline == Trampoline.ONE:
             pyautogui.click(*self.TRAMPOLINE_1_POSITION)
@@ -194,10 +195,3 @@ class QiraController:
         else:
             raise QiraControllerError(f"Cannot transition from {self._state} to {State.REVIEW}.")
 
-    def review_short(self):
-        # set state REVIEW after a short routine
-        if self._state == State.ROUTINE:
-            self._press_space()
-            self._state = State.REVIEW
-        else:
-            raise QiraControllerError(f"Cannot transition from {self._state} to {State.REVIEW}.")
