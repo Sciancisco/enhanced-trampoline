@@ -9,7 +9,6 @@ import requests
 
 class State(Enum):
 
-    LAUNCHED = -2
     TERMINATED = -1
     READY = 0
     START = 1
@@ -169,8 +168,8 @@ class QiraController:
     #
     def ready(self):
         # set state READY
-        if self._state == State.LAUNCHED:
-            self._state = State.READY
+        if self._state == State.READY:
+            pass
 
         elif self._state == State.REVIEW:
             self._press_space()

@@ -15,7 +15,7 @@ qc = QiraController(
     QiraConfig.TRAMPOLINE_AUTO_POSITION,
 )
 
-def test_run(gc):
+def test_run(qc):
     qc.ready()
     qc.send_routine_meta('Testy', 'McTest')
     qc.start()
