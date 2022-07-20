@@ -9,7 +9,7 @@ import requests
 
 class State(Enum):
 
-    TERMINATED = -1
+    CLOSED = -1
     READY = 0
     START = 1
     ROUTINE = 2
@@ -52,48 +52,35 @@ class QiraController:
         self._trampoline_2_position = trampoline_2_position
         self._trampoline_12_position = trampoline_12_position
         self._trampoline_auto_position = trampoline_auto_position
-        self._proc = None
         self._window = None
-        self._state = State.TERMINATED
-
-    def _is_proc_running(self):
-        return self._proc is not None and self._proc.returncode is None
+        self._state = State.CLOSED
 
     def _window_exists(self):
         return self._window and self._window_title in gw.getAllTitles()
 
     def _position_window(self):
-        if not self._is_proc_running():
-            raise QiraControllerError("No Qira process running.")
-
         if not self._window_exists():
-            raise QiraControllerError("No Qira window found.")
+            raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         self._window.moveTo(*self._window_position)
         self._window.resizeTo(*self._window_size)
 
     def _press_space(self):
-        if not self._is_proc_running():
-            raise QiraControllerError("No Qira process running.")
-
         if not self._window_exists():
-            raise QiraControllerError("No Qira window found.")
+            raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         self._window.activate()
         pyautogui.press(' ')
 
     def _detect_state(self):
-        if not self._is_proc_running():
-            raise QiraControllerError("No Qira process running.")
-
         if not self._window_exists():
-            raise QiraControllerError("No Qira window found.")
+            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
         # TODO ?
         raise NotImplementedError("Not implemented yet.")
 
     def launch(self):
-        if not self._is_proc_running():
-            self._proc = subprocess.Popen(self._exe_path)
+        if not self._window_exists():
+            subprocess.Popen(self._exe_path)
 
             t = 0
             timeout = 10
@@ -102,37 +89,24 @@ class QiraController:
                 t += 1
 
             if not t < timeout:
-                raise QiraControllerError("Could not acquire Qira window.")
-            else:
-                self._window = gw.getWindowsWithTitle(self._window_title)[0]
-                self._state = State.READY
+                raise QiraControllerError(f"Could not acquire Qira window with title '{self._window_title}'.")
         else:
-            raise QiraControllerError("Qira is already running.")
-
-    def terminate(self):
-        # TODO: test terminate -> close, close -> terminate, close -> close, terminate -> terminate
-        if self._is_proc_running():
-            self._proc.terminate()
-        self._proc = None
-        self._window = None
-        self._state = State.TERMINATED
+            self._window = gw.getWindowsWithTitle(self._window_title)[0]
+            self._state = State.READY
 
     def close(self):
-        if not self._is_proc_running():
-            raise QiraControllerError("No process found.")
-
-        if not self._window_exists():
-            raise QiraControllerError("No window found.")
-
-        if self._window:
+        if self._window_exists():
             self._window.close()
             while self._window_title in gw.getAllTitles():
                 time.sleep(1)
-            self._state = State.TERMINATED  # TODO: verify behaviour
+
+        self._state = State.CLOSED
 
     def send_routine_meta(self, firstname, lastname):
-        if not self._is_proc_running():
-            raise QiraControllerErro("No Qira process running.")
+        if self._state == State.CLOSED:
+            raise QiraControllerError("Qira is not running.")
+        if not self._window_exists():
+            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
 
         data = {'firstname': firstname, 'lastname': lastname}
         response = requests.post(f'http://{self._address}/routinemeta', json=data)
@@ -140,18 +114,15 @@ class QiraController:
             raise QiraControllerError(f"An error occured while sending routine meta: {response.status_code} - {response.reason}")
 
     def select_trampoline(self, trampoline):
-        if not self._is_proc_running():
-            raise QiraControllerError("No Qira process running.")
-
         if not self._window_exists():
-            raise QiraControllerError("No Qira window found.")
+            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
 
         if self._state != State.READY:
             raise QiraControllerError(f"Can only select trampoline in {State.READY}.")
 
         self._position_window()
         self._window.activate()
-        # maybe init the controller with the positions directly
+
         pyautogui.click(*self._trampoline_selector_position)
         time.sleep(.5)
 
@@ -169,12 +140,12 @@ class QiraController:
     #
     # transition functions
     #
-    def ready(self):
-        if not self._is_proc_running():
-            raise QiraControllerError("No process found.")
+    def force_ready(self):
+        self._state = State.READY
 
+    def ready(self):
         if not self._window_exists():
-            raise QiraControllerError("No window found.")
+            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
 
         # set state READY
         if self._state == State.READY:
@@ -188,11 +159,8 @@ class QiraController:
             raise QiraControllerError(f"Cannot transition from {self._state} to {State.READY}.")
 
     def start(self):
-        if not self._is_proc_running():
-            raise QiraControllerError("No process found.")
-
         if not self._window_exists():
-            raise QiraControllerError("No window found.")
+            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
 
         # set state START
         if self._state == State.READY:
@@ -202,11 +170,8 @@ class QiraController:
             raise QiraControllerError(f"Cannot transition from {self._state} to {State.START}.")
 
     def routine(self):
-        if not self._is_proc_running():
-            raise QiraControllerError("No process found.")
-
         if not self._window_exists():
-            raise QiraControllerError("No window found.")
+            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
 
         # set state ROUTINE
         if self._state == State.START:
@@ -216,11 +181,8 @@ class QiraController:
             raise QiraControllerError(f"Cannot transition from {self._state} to {State.ROUTINE}.")
 
     def review(self):
-        if not self._is_proc_running():
-            raise QiraControllerError("No process found.")
-
         if not self._window_exists():
-            raise QiraControllerError("No window found.")
+            raise QiraControllerError("No Qira window found with title '{self._window_title}'.")
 
         # set state REVIEW
         if self._state == State.ROUTINE:
