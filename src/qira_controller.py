@@ -31,22 +31,28 @@ class QiraControllerError(Exception):
 
 class QiraController:
 
-    WINDOW_SIZE = (1600, 855)
-    WINDOW_POSITION = (0, 0)
-    TRAMPOLINE_SELECTOR_POSITION = (240, 200)  # positions on a 1600x900 tn panel
-    TRAMPOLINE_1_POSITION = (240, 225)
-    TRAMPOLINE_2_POSITION = (240, 245)
-    TRAMPOLINE_12_POSITION = (240, 260)
-    TRAMPOLINE_AUTO_POSITION = (240, 280)
-
-    ADDRESS = '127.0.0.1:8080'
-    EXE_PATH = 'C:\Program Files (x86)\Qira\Qira.exe'
-    WINDOW_TITLE = 'Qira v2.1.0'
-
-    def __init__(self, exe_path, window_title, address):
+    def __init__(self,
+        exe_path,
+        window_title,
+        address,
+        window_size,
+        window_position,
+        trampoline_selector_position,
+        trampoline_1_position,
+        trampoline_2_position,
+        trampoline_12_position,
+        trampoline_auto_position
+    ):
         self._exe_path = exe_path
         self._window_title = window_title
         self._address = address
+        self._window_size = window_size
+        self._window_position = window_position
+        self._trampoline_selector_position = trampoline_selector_position
+        self._trampoline_1_position = trampoline_1_position
+        self._trampoline_2_position = trampoline_1_position
+        self._trampoline_12_position = trampoline_1_position
+        self._trampoline_auto_position = trampoline_1_position
         self._proc = None
         self._window = None
         self._state = State.TERMINATED
@@ -64,8 +70,8 @@ class QiraController:
         if not self._window_exists():
             raise QiraControllerError("No Qira window found.")
 
-        self._window.moveTo(*self.WINDOW_POSITION)
-        self._window.resizeTo(*self.WINDOW_SIZE)
+        self._window.moveTo(*self._window_position)
+        self._window.resizeTo(*self._window_size)
 
     def _press_space(self):
         if not self._is_proc_running():
@@ -142,17 +148,17 @@ class QiraController:
         self._position_window()
         self._window.activate()
         # maybe init the controller with the positions directly
-        pyautogui.click(*self.TRAMPOLINE_SELECTOR_POSITION)
+        pyautogui.click(*self._trampoline_selector_position)
         time.sleep(.3)
 
         if trampoline == Trampoline.ONE:
-            pyautogui.click(*self.TRAMPOLINE_1_POSITION)
+            pyautogui.click(*self._trampoline_1_position)
         elif trampoline == Trampoline.TWO:
-            pyautogui.click(*self.TRAMPOLINE_2_POSITION)
+            pyautogui.click(*self._trampoline_2_position)
         elif trampoline == Trampoline.ONETWO:
-            pyautogui.click(*self.TRAMPOLINE_12_POSITION)
+            pyautogui.click(*self._trampoline_12_position)
         elif trampoline == Trampoline.AUTO:
-            pyautogui.click(*self.TRAMPOLINE_AUTO_POSITION)
+            pyautogui.click(*self._trampoline_auto_position)
         else:
             raise QiraControllerError("Invalid argument: trampoline must be in enum Trampoline.")
 
