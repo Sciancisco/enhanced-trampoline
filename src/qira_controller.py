@@ -56,7 +56,14 @@ class QiraController:
         self._state = State.CLOSED
 
     def _window_exists(self):
-        return self._window and self._window_title in gw.getAllTitles()
+        # not the cleanest having a 'getter' changing the state of the object
+        # but convenient to ensure that is window exists then self._window != None.
+        if self._window_title in gw.getAllTitles():
+            self._window = gw.getWindowsWithTitle(self._window_title)[0]
+            return True
+        else:
+            self._window = None
+            return False
 
     def _position_window(self):
         if not self._window_exists():
@@ -79,25 +86,25 @@ class QiraController:
         raise NotImplementedError("Not implemented yet.")
 
     def launch(self):
-        if not self._window_exists():
+        if not self._window_exists():  # grab window here if exists
             subprocess.Popen(self._exe_path)
 
             t = 0
             timeout = 10
-            while self._window_title not in gw.getAllTitles() and t < timeout:
+            while not self._window_exists() and t < timeout:
                 time.sleep(1)
                 t += 1
 
             if not t < timeout:
                 raise QiraControllerError(f"Could not acquire Qira window with title '{self._window_title}'.")
         else:
-            self._window = gw.getWindowsWithTitle(self._window_title)[0]
+            self._window.activate()
             self._state = State.READY
 
     def close(self):
         if self._window_exists():
             self._window.close()
-            while self._window_title in gw.getAllTitles():
+            while self._window_title in gw.getAllTitles():  # TODO: possible infinite loop there is a pop up that can prevent closure
                 time.sleep(1)
 
         self._state = State.CLOSED
