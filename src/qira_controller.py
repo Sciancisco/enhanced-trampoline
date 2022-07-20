@@ -49,9 +49,9 @@ class QiraController:
         self._window_position = window_position
         self._trampoline_selector_position = trampoline_selector_position
         self._trampoline_1_position = trampoline_1_position
-        self._trampoline_2_position = trampoline_1_position
-        self._trampoline_12_position = trampoline_1_position
-        self._trampoline_auto_position = trampoline_1_position
+        self._trampoline_2_position = trampoline_2_position
+        self._trampoline_12_position = trampoline_12_position
+        self._trampoline_auto_position = trampoline_auto_position
         self._proc = None
         self._window = None
         self._state = State.TERMINATED
@@ -150,7 +150,7 @@ class QiraController:
         self._window.activate()
         # maybe init the controller with the positions directly
         pyautogui.click(*self._trampoline_selector_position)
-        time.sleep(.3)
+        time.sleep(.5)
 
         if trampoline == Trampoline.ONE:
             pyautogui.click(*self._trampoline_1_position)
