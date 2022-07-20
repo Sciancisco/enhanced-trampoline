@@ -50,7 +50,7 @@ def test_run_2(qc, tramp):
     sleep(12)
     print("Review")
     qc.review()
-    sleep(5)
+    sleep(10)
 
     print("Ready")
     qc.ready()
@@ -66,6 +66,8 @@ def test_run_2(qc, tramp):
     sleep(12)
     print("Review")
     qc.review()
-    sleep(5)
+    sleep(10)
 
+    print("Ready")
+    qc.ready()
 
