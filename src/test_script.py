@@ -15,14 +15,23 @@ qc = QiraController(
     QiraConfig.TRAMPOLINE_AUTO_POSITION,
 )
 
-def test_run(qc):
+def test_run(qc, tramp):
+    print("Ready")
     qc.ready()
+    print("Send routine meta")
     qc.send_routine_meta('Testy', 'McTest')
+    print("Select trampoline")
+    qc.select_trampoline(tramp)
+    print("Start")
     qc.start()
     sleep(10)
+    print("Routine")
     qc.routine()
     sleep(15)
+    print("Review")
     qc.review()
+    sleep(5)
+    print("Ready")
     qc.ready()
 
 
