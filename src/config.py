@@ -1,5 +1,5 @@
 
-class QiraController:
+class QiraConfig:
 
     WINDOW_SIZE = (1600, 855)
     WINDOW_POSITION = (0, 0)
@@ -15,7 +15,7 @@ class QiraController:
     WINDOW_TITLE = 'Qira v2.1.0'
 
 
-class Server:
+class ServerConfig:
 
     DAT_DIRECTORY = ''
     VIDEO_DIRECTORY = ''
