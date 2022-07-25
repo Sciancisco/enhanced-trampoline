@@ -42,7 +42,7 @@ class QiraController:
         trampoline_1_position,
         trampoline_2_position,
         trampoline_12_position,
-        trampoline_auto_position
+        trampoline_auto_position,
         ready_state_position,
         start_state_position,
         routine_state_position,
@@ -89,21 +89,21 @@ class QiraController:
             return None
 
     def _position_window(self):
-        if not window := self._detect_window():
+        if not (window := self._detect_window()):
             raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         window.moveTo(*self._window_position)
         window.resizeTo(*self._window_size)
 
     def _press_space(self):
-        if not window := self._detect_window():
+        if not (window := self._detect_window()):
             raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         window.activate()
         pyautogui.press(' ')
 
     def _detect_state(self):
-        if not window := self._detect_window():
+        if not (window := self._detect_window()):
             return State.CLOSED
 
         window.activate()
@@ -125,12 +125,12 @@ class QiraController:
             raise QiraControllerError("Could not detect state.")
 
     def launch(self):
-        if not window := self._detect_window():  # grab window here if exists
+        if not (window := self._detect_window()):  # grab window here if exists
             subprocess.Popen(self._exe_path)
 
             t = 0
             timeout = 10
-            while not window := self._detect_window() and t < timeout:
+            while not (window := self._detect_window()) and t < timeout:
                 time.sleep(1)
                 t += 1
 
@@ -148,7 +148,7 @@ class QiraController:
             raise QiraControllerError("Qira is not running.")
 
         if state not in {State.READY, State.START, State.ROUTINE, State.REVIEW}:
-            raise QiraControllerError(f"Cannot send routine meta in state {state}."
+            raise QiraControllerError(f"Cannot send routine meta in state {state}.")
 
         data = {'firstname': firstname, 'lastname': lastname, 'timestamp': timestamp}
         response = requests.post(f'http://{self._address}/routinemeta', json=data)
@@ -156,7 +156,7 @@ class QiraController:
             raise QiraControllerError(f"An error occured while sending routine meta: {response.status_code} - {response.reason}")
 
     def select_trampoline(self, trampoline):
-        if not window := self._detect_window():
+        if not (window := self._detect_window()):
             raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         if self._detect_state() != State.READY:
