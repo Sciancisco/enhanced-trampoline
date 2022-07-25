@@ -117,7 +117,7 @@ class QiraController:
             return State.ROUTINE
         elif screenshot.getpixel(self._review_state_position) == self._review_state_color:
             return State.REVIEW
-        elif screenshot.getpixel(self._no_usb_state_position) == self._no_usb_state_color:
+        elif screenshot.getpixel(self._nousb_state_position) == self._nousb_state_color:
             return State.NOUSB
         elif screenshot.getpixel(self._diagnosis_state_position) == self._diagnosis_state_color:
             return State.DIAGNOSIS
@@ -144,7 +144,7 @@ class QiraController:
             window.close()
 
     def send_routine_meta(self, firstname, lastname, timestamp):
-        if state := self._detect_state() == State.CLOSED:
+        if (state := self._detect_state()) == State.CLOSED:
             raise QiraControllerError("Qira is not running.")
 
         if state not in {State.READY, State.START, State.ROUTINE, State.REVIEW}:

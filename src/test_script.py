@@ -1,4 +1,5 @@
-from time import sleep
+from time import sleep, strftime
+
 from qira_controller import QiraController, Trampoline
 from config import QiraConfig
 
@@ -84,6 +85,7 @@ def test_run_2(qc, tramp1, tramp2):
     qc.ready()
 
 def test_remote(qc):
+    from pynput import keyboard
 
     def on_press(key):
         try:
@@ -92,15 +94,16 @@ def test_remote(qc):
             k = key.name
 
         if k in [f'{i}' for i in range(10)]:
-            atheles = {'1': ('Testy', 'McTest'), '2': ('Fancy', 'Tester')}
-            qc.send_routine_meta(*athletes[k], timestamp=42)
+            athletes = {'2': ('Testy', 'McTest'), '3': ('Fancy', 'Tester')}  # turns out that '1' also changes Qira's state because...
+            qc.send_routine_meta(*athletes[k], timestamp=f'{strftime("%Y%m%d_%H%M%S)}')
         elif k == 'media_play_pause':
             qc.change_state()
         elif k == 'media_previous':
             qc.select_trampoline(Trampoline.ONE)
         elif k == 'media_next':
             qc.select_trampoline(Trampoline.TWO)
-
+        elif k == 'esc':
+            return False
 
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
