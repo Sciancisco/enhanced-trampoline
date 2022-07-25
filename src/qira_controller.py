@@ -43,6 +43,18 @@ class QiraController:
         trampoline_2_position,
         trampoline_12_position,
         trampoline_auto_position
+        ready_state_position,
+        start_state_position,
+        routine_state_position,
+        review_state_position,
+        nousb_state_position,
+        diagnosis_state_position,
+        ready_state_color,
+        start_state_color,
+        routine_state_color,
+        review_state_color,
+        nousb_state_color,
+        diagnosis_state_color
     ):
         self._exe_path = exe_path
         self._window_title = window_title
