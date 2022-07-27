@@ -9,6 +9,7 @@ import requests
 
 class State(Enum):
 
+    UNDEFINED = -2
     CLOSED = -1
     NOUSB = 0
     READY = 1
@@ -122,10 +123,10 @@ class QiraController:
         elif screenshot.getpixel(self._diagnosis_state_position) == self._diagnosis_state_color:
             return State.DIAGNOSIS
         else:
-            raise QiraControllerError("Could not detect state.")
+            return State.UNDEFINED
 
     def launch(self):
-        if not (window := self._detect_window()):  # grab window here if exists
+        if not (window := self._detect_window()):
             subprocess.Popen(self._exe_path)
 
             t = 0
@@ -144,10 +145,7 @@ class QiraController:
             window.close()
 
     def send_routine_meta(self, firstname, lastname, timestamp):
-        if (state := self._detect_state()) == State.CLOSED:
-            raise QiraControllerError("Qira is not running.")
-
-        if state not in {State.READY, State.START, State.ROUTINE, State.REVIEW}:
+        if self._detect_state() not in {State.READY, State.START, State.ROUTINE, State.REVIEW}:
             raise QiraControllerError(f"Cannot send routine meta in state {state}.")
 
         data = {'firstname': firstname, 'lastname': lastname, 'timestamp': timestamp}
@@ -159,8 +157,8 @@ class QiraController:
         if not (window := self._detect_window()):
             raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
-        if self._detect_state() != State.READY:
-            raise QiraControllerError(f"Can only select trampoline in {State.READY}.")
+        if (state := self._detect_state()) != State.READY:
+            raise QiraControllerError(f"Can only select trampoline in {State.READY}, not {state}.")
 
         self._position_window()
         window.activate()
