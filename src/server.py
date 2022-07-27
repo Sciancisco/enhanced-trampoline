@@ -82,7 +82,7 @@ class Server:
 
     def start(self):
         self._qira_controller.launch()
-        if self._listener is not None:
+        if self._listener is None:
             self._listener = keyboard.Listener(on_press=self._on_remote_press)
             self._listener.start()
 
