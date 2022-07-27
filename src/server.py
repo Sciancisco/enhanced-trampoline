@@ -29,7 +29,7 @@ class Server:
             return False
 
 
-    def _on_remote_press(key):  # also work for keyboard presses since the remote is basically a keyboard
+    def _on_remote_press(self, key):  # also work for keyboard presses since the remote is basically a keyboard
         state = self._qira_controller.get_state()
 
         try:
