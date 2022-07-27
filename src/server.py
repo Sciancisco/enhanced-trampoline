@@ -30,15 +30,13 @@ class Server:
 
 
     def _on_remote_press(self, key):  # also work for keyboard presses since the remote is basically a keyboard
-        state = self._qira_controller.get_state()
-
         try:
             k = key.char
         except:
             k = key.name
 
         if k in {'0', '2', '3', '4', '5', '6', '7', '8', '9'}:
-            if state in {State.READY, State.START, State.ROUTINE, State.REVIEW} and k in self._athlete_map:
+            if  self._qira_controller.get_state() in {State.READY, State.START, State.ROUTINE, State.REVIEW} and k in self._athlete_map:
                 self._firstname, self._lastname = self._athlete_map[k]
                 self._send_routine_meta()
 
@@ -58,14 +56,14 @@ class Server:
                     print("WRITE VIDEO")
 
         elif k == 'media_previous':
-            if state == State.READY:
+            if self._qira_controller.get_state() == State.READY:
                 try:
                     self._qira_controller.select_trampoline(Trampoline.ONE)
                 except Exception as e:
                     print(e)
 
         elif k == 'media_next':
-            if state == State.READY:
+            if self._qira_controller.get_state() == State.READY:
                 try:
                     self._qira_controller.select_trampoline(Trampoline.TWO)
                 except Exception as e:

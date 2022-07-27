@@ -100,7 +100,7 @@ def test_remote(qc):
 
         if k in [f'{i}' for i in range(10)]:
             athletes = {'2': ('Testy', 'McTest'), '3': ('Fancy', 'Tester')}  # turns out that '1' also changes Qira's state because...
-            qc.send_routine_meta(*athletes[k], timestamp=f'{strftime("%Y%m%d_%H%M%S)"}')
+            qc.send_routine_meta(*athletes[k], timestamp=f'{strftime("%Y%m%d_%H%M%S")}')
         elif k == 'media_play_pause':
             qc.change_state()
         elif k == 'media_previous':
