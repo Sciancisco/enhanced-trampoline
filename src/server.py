@@ -1,20 +1,38 @@
 import time
+from threading import Thread
 
 from pynput import keyboard
 
-import config
 from qira_controller import Trampoline, State
+from camera_controller import CameraRecorder
 
 
 class Server:
 
-    def __init__(self, qira_controller):
+    def __init__(self,
+        qira_controller,
+        camera_recorder_spec,
+        filename_spec,
+        save_data_directory,
+        save_video_directory,
+        qira_data_directory
+    ):
         self._qira_controller = qira_controller
+
+        self._camera_recorder_spec = camera_recorder_spec
+        self._camera_recorder = None
+
+        self._filename_spec = filename_spec
+        self._save_data_directory = save_data_directory
+        self._save_video_directory = save_video_directory
+        self._qira_data_directory = qira_data_directory
+
+        self._athlete_map = {}
+        self._listener = None
+
         self._timestamp = ''
         self._firstname = ''
         self._lastname = ''
-        self._athlete_map = {}
-        self._listener = None
 
     def _send_routine_meta(self):
         try:
@@ -28,6 +46,25 @@ class Server:
             print(e)
             return False
 
+    def _start_video_recording(self):
+        if self._camera_recorder and self._camera_recorder.is_alive():
+            # if Qira's state changes and the server never sees the transition (REVIEW, READY)
+            self._camera_recorder.stop()
+            filename = filename_spec.format(firstname=self._firstname, lastname=self._lastname, timestamp=self._timestamp)
+            self._camera_recorder.save_video(f'{self._save_video_directory}/{filename}_recovered.mp4')
+
+        self._camera_recorder = CameraRecorder(**self._camera_recorder_spec)
+        self._camera_recorder.start()
+
+    def _stop_video_recording(self):
+        if self._camera_recorder:
+            self._camera_recorder.stop()
+
+    def _save_video(self):
+        if self._camera_recorder:
+            self._camera_recorder.stop()
+        filename = filename_spec.format(firstname=self._firstname, lastname=self._lastname, timestamp=self._timestamp)
+        self._camera_recorder.save_video(f'{self._save_video_directory}/{filename}.mp4')
 
     def _on_remote_press(self, key):  # also work for keyboard presses since the remote is basically a keyboard
         try:
@@ -43,17 +80,22 @@ class Server:
         elif k == 'media_play_pause':
             success = False
             try:
-                from_, to = self._qira_controller.change_state()
+                transition = self._qira_controller.change_state()
                 success = True
             except Exception as e:
                 print(e)
 
             if success:
-                if from_ == State.READY and to == State.START:
+                if transition == (State.READY, State.START):
                     self._timestamp = time.strftime('%Y%m%d_%H%M%S')
                     self._send_routine_meta()
-                elif from_ == State.REVIEW and to == State.READY:
-                    print("WRITE VIDEO")
+                    self._start_video_recording()
+
+                elif transition == (State.ROUTINE, State.REVIEW):
+                    self._stop_video_recording()
+
+                elif transition == (State.REVIEW, State.READY):
+                    self._save_video()
 
         elif k == 'media_previous':
             if self._qira_controller.get_state() == State.READY:

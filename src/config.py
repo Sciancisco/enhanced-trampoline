@@ -29,7 +29,17 @@ class QiraConfig:
     DIAGNOSIS_STATE_COLOR = (50, 100, 200)
 
 
+class CameraConfig:
+
+    RESOLUTION = (1920, 1080)
+    FPS = 60.
+    FOURCC = 'XVID'
+    CAMERA_INDEX = 1
+
+
 class ServerConfig:
 
-    DAT_DIRECTORY = ''
-    VIDEO_DIRECTORY = ''
+    FILENAME_SPEC = '{firstname}_{lastname}_{timestamp}'
+    SAVE_DATA_DIRECTORY = 'C:/Users/Test/enhanced-trampoline/local/save'
+    SAVE_VIDEO_DIRECTORY = 'C:/Users/Test/enhanced-trampoline/local/save/video'
+    QIRA_DATA_DIRECTORY = 'C:/Users/Test/enhanced-trampoline/local'
