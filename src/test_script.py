@@ -42,8 +42,8 @@ server = Server(
     qira_controller=qc,
     camera_recorder_spec=crs,
     filename_spec=ServerConfig.FILENAME_SPEC,
-    save_data_directory=ServerConfig.SAVE_DATA_DIRECTORY
-    save_video_directory=ServerConfig.SAVE_VIDEO_DIRECTORY
+    save_data_directory=ServerConfig.SAVE_DATA_DIRECTORY,
+    save_video_directory=ServerConfig.SAVE_VIDEO_DIRECTORY,
     qira_data_directory=ServerConfig.QIRA_DATA_DIRECTORY
 )
 
