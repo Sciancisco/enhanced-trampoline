@@ -180,7 +180,11 @@ class QiraController:
             raise TypeError(f"Invalid argument 'trampoline': must be in enum Trampoline not {trampoline}.")
 
     def change_state(self):
+        from_ = self._detect_state()
         self._press_space()
+        to = self._detect_state()
+
+        return from_, to
 
     def get_state(self):
         return self._detect_state()

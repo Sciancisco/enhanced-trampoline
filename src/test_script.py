@@ -1,7 +1,9 @@
 from time import sleep, strftime
 
-from qira_controller import QiraController, Trampoline
 from config import QiraConfig
+from qira_controller import QiraController, Trampoline
+from server import Server
+
 
 qc = QiraController(
     QiraConfig.EXE_PATH,
@@ -27,6 +29,9 @@ qc = QiraController(
     QiraConfig.NOUSB_STATE_COLOR,
     QiraConfig.DIAGNOSIS_STATE_COLOR
 )
+
+server = Server(qc)
+
 
 def test_run(qc, tramp):
     print("Ready")
@@ -108,4 +113,3 @@ def test_remote(qc):
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
     listener.join()
-
