@@ -73,7 +73,7 @@ class Server:
         if not self._use_cam:
             return
 
-        if self._recorderding_thread:
+        if self._recording_thread:
             self._camera_recorder.stop_recording()
         filename = self._filename_spec.format(firstname=self._firstname, lastname=self._lastname, timestamp=self._timestamp)
         self._camera_recorder.save_video(f'{self._save_video_directory}/{filename}.avi')

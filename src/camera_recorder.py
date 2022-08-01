@@ -6,7 +6,7 @@ import cv2
 
 class CameraRecorder:
 
-    def __init__(self, cam_index, fourcc, fps):
+    def __init__(self, cam_index, fourcc):
         self._cam = cv2.VideoCapture(cam_index)
         self._fourcc = cv2.VideoWriter_fourcc(*fourcc)  # TODO: better use DIVX for windows?
         self._resolution = (int(self._cam.get(3)), int(self._cam.get(4)))

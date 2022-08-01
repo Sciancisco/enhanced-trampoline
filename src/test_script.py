@@ -2,7 +2,7 @@ from time import sleep, strftime
 
 from config import QiraConfig, CameraConfig, ServerConfig
 from qira_controller import QiraController, Trampoline
-from camera_recorder import CameraRecorderSpec
+from camera_recorder import CameraRecorder
 from server import Server
 
 
@@ -31,7 +31,7 @@ qc = QiraController(
     QiraConfig.DIAGNOSIS_STATE_COLOR
 )
 
-cr = CameraRecorder(CameraConfig.CAMERA_INDEC, CameraConfig.FOURCC)
+cr = CameraRecorder(CameraConfig.CAMERA_INDEX, CameraConfig.FOURCC)
 
 server = Server(
     qira_controller=qc,
