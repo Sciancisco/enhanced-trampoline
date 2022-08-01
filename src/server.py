@@ -14,7 +14,7 @@ class Server:
         filename_spec,
         save_data_directory,
         save_video_directory,
-        qira_data_directory
+        qira_data_directory,
         use_cam=True
     ):
         self._qira_controller = qira_controller

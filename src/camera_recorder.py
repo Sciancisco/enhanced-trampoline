@@ -25,9 +25,12 @@ class CameraRecorder(Thread):
 
         self._is_recording = True
 
-        while self._is_recording:
+        while cam.isOpened() and self._is_recording:
             _, frame = cam.read()
             self._buffer.append(frame)
+        
+        if not cam.isOpened():
+            self._is_recording = False
 
         cam.release()
 
