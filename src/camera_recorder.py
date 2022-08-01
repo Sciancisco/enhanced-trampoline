@@ -4,7 +4,7 @@ from threading import Thread
 import cv2
 
 
-CameraRecorderSpec = namedtuple('CameraRecorderSpec', 'cam_index fourcc fps resolution')
+CameraRecorderSpec = namedtuple('CameraRecorderSpec', 'cam_index fourcc fps')
 
 
 class CameraRecorder(Thread):
@@ -27,7 +27,8 @@ class CameraRecorder(Thread):
         while cam.isOpened() and self._is_recording:
             ret, frame = cam.read()
             if ret:
-                frame = frame.astype('uint8')
+                # https://github.com/ContinuumIO/anaconda-issues/issues/223
+                frame = cv2.resize(frame.astype('uint8'), (640, 480), cv2.INTER_LANCZOS4)
                 self._buffer.append(frame)
         
         if not cam.isOpened():
