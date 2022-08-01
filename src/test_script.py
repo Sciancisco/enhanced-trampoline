@@ -31,16 +31,11 @@ qc = QiraController(
     QiraConfig.DIAGNOSIS_STATE_COLOR
 )
 
-crs = CameraRecorderSpec(
-    cam_index=CameraConfig.CAMERA_INDEX,
-    fourcc=CameraConfig.FOURCC,
-    fps=CameraConfig.FPS,
-    resolution=CameraConfig.RESOLUTION
-)
+cr = CameraRecorder(CameraConfig.CAMERA_INDEC, CameraConfig.FOURCC)
 
 server = Server(
     qira_controller=qc,
-    camera_recorder_spec=crs,
+    camera_recorder=cr,
     filename_spec=ServerConfig.FILENAME_SPEC,
     save_data_directory=ServerConfig.SAVE_DATA_DIRECTORY,
     save_video_directory=ServerConfig.SAVE_VIDEO_DIRECTORY,

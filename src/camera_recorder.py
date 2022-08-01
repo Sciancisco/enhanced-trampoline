@@ -1,56 +1,62 @@
 from collections import deque, namedtuple
-from threading import Thread
+import time
 
 import cv2
 
 
-CameraRecorderSpec = namedtuple('CameraRecorderSpec', 'cam_index fourcc fps')
-
-
-class CameraRecorder(Thread):
+class CameraRecorder:
 
     def __init__(self, cam_index, fourcc, fps):
-        super().__init__()
-        self._cam_index = cam_index
-        self._fourcc = cv2.VideoWriter_fourcc(*fourcc)
-        self._fps = fps
-        self._resolution = None
+        self._cam = cv2.VideoCapture(cam_index)
+        self._fourcc = cv2.VideoWriter_fourcc(*fourcc)  # TODO: better use DIVX for windows?
+        self._resolution = (int(self._cam.get(3)), int(self._cam.get(4)))
+        self._fps = None
         self._is_recording = False
         self._buffer = deque()
+        
+    def __del__(self):
+        # make sure to release if object deleted at runtime 
+        self._cam.release()
 
     # to launch in a thread
-    def run(self):
-        self._buffer.clear()
-        cam = cv2.VideoCapture(self._cam_index)
-        self._resolution = (int(cam.get(3)), int(cam.get(4)))
+    def start_recording(self):
+        if self._is_recording:
+            raise Exception("Already recording.")
 
+        self._buffer.clear()
+        nb_frames = 0
+        start = time.time()
         self._is_recording = True
 
-        while cam.isOpened() and self._is_recording:
-            ret, frame = cam.read()
+        while self._cam.isOpened() and self._is_recording:
+            ret, frame = self._cam.read()
             if ret:
                 # https://github.com/ContinuumIO/anaconda-issues/issues/223
                 frame = cv2.resize(frame.astype('uint8'), self._resolution, cv2.INTER_LANCZOS4)
                 self._buffer.append(frame)
+                nb_frames += 1
             else:
                 self._is_recording = False
-        
-        if not cam.isOpened():
-            self._is_recording = False
 
-        cam.release()
+        stop = time.time()
+        self._fps = nb_frames / (stop - start)
+
+        if not self._cam.isOpened():
+            self._is_recording = False
+    
+    def stop_recording(self):
+        self._is_recording = False
 
     def save_video(self, filename):
         if not self._buffer:
             print("Nothing to save")
             return
+        try:
+            writer = cv2.VideoWriter(filename, self._fourcc, self._fps, self._resolution)
 
-        writer = cv2.VideoWriter(filename, self._fourcc, self._fps, self._resolution)
+            for frame in self._buffer:
+                writer.write(frame)
 
-        for frame in self._buffer:
-            writer.write(frame)
+        finally:
+            writer.release()
 
-        writer.release()
-
-    def stop(self):
-        self._is_recording = False

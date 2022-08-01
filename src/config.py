@@ -31,10 +31,8 @@ class QiraConfig:
 
 class CameraConfig:
 
-    RESOLUTION = (1920, 1080)
-    FPS = 60.
-    FOURCC = 'XVID'
-    CAMERA_INDEX = 1
+    FOURCC = 'DIVX'
+    CAMERA_INDEX = 0
 
 
 class ServerConfig:

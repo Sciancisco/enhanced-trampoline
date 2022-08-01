@@ -1,3 +1,4 @@
+from threading import Thread
 import time
 
 from pynput import keyboard
@@ -10,7 +11,7 @@ class Server:
 
     def __init__(self,
         qira_controller,
-        camera_recorder_spec,
+        camera_recorder,
         filename_spec,
         save_data_directory,
         save_video_directory,
@@ -19,8 +20,8 @@ class Server:
     ):
         self._qira_controller = qira_controller
 
-        self._camera_recorder_spec = camera_recorder_spec
-        self._camera_recorder = None
+        self._camera_recorder = camera_recorder
+        self._recording_thread = None
 
         self._filename_spec = filename_spec
         self._save_data_directory = save_data_directory
@@ -52,30 +53,30 @@ class Server:
         if not self._use_cam:
             return
 
-        if self._camera_recorder and self._camera_recorder.is_alive():
+        if self._recording_thread and self._recording_thread.is_alive():
             # if Qira's state changes and the server never sees the transition (REVIEW, READY)
-            self._camera_recorder.stop()
+            self._camera_recorder.stop_recording()
             filename = self._filename_spec.format(firstname=self._firstname, lastname=self._lastname, timestamp=self._timestamp)
-            self._camera_recorder.save_video(f'{self._save_video_directory}/{filename}_recovered.mp4')
+            self._camera_recorder.save_video(f'{self._save_video_directory}/{filename}_recovered.avi')
 
-        self._camera_recorder = CameraRecorder(**self._camera_recorder_spec)
-        self._camera_recorder.start()
+        self._recording_thread = Thread(target=self._camera_recorder.start_recording)
+        self._recording_thread.start()
 
     def _stop_video_recording(self):
         if not self._use_cam:
             return
 
-        if self._camera_recorder:
-            self._camera_recorder.stop()
+        if self._recording_thread:
+            self._camera_recorder.stop_recording()
 
     def _save_video(self):
         if not self._use_cam:
             return
 
-        if self._camera_recorder:
-            self._camera_recorder.stop()
+        if self._recorderding_thread:
+            self._camera_recorder.stop_recording()
         filename = self._filename_spec.format(firstname=self._firstname, lastname=self._lastname, timestamp=self._timestamp)
-        self._camera_recorder.save_video(f'{self._save_video_directory}/{filename}.mp4')
+        self._camera_recorder.save_video(f'{self._save_video_directory}/{filename}.avi')
 
     def _on_remote_press(self, key):  # also work for keyboard presses since the remote is basically a keyboard
         try:
@@ -103,6 +104,7 @@ class Server:
                     self._start_video_recording()
 
                 elif from_ == State.ROUTINE and to == State.REVIEW:
+                    # TODO: handle when Qira changes from ROUTINE to REVIEW automatically
                     self._stop_video_recording()
 
                 elif from_ == State.REVIEW and to == State.READY:
