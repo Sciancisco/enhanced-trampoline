@@ -14,6 +14,7 @@ class CameraRecorder(Thread):
         self._cam_index = cam_index
         self._fourcc = cv2.VideoWriter_fourcc(*fourcc)
         self._fps = fps
+        self._resolution = None
         self._is_recording = False
         self._buffer = deque()
 
@@ -21,6 +22,7 @@ class CameraRecorder(Thread):
     def run(self):
         self._buffer.clear()
         cam = cv2.VideoCapture(self._cam_index)
+        self._resolution = (int(cam.get(3)), int(cam.get(4)))
 
         self._is_recording = True
 
@@ -28,8 +30,10 @@ class CameraRecorder(Thread):
             ret, frame = cam.read()
             if ret:
                 # https://github.com/ContinuumIO/anaconda-issues/issues/223
-                frame = cv2.resize(frame.astype('uint8'), (640, 480), cv2.INTER_LANCZOS4)
+                frame = cv2.resize(frame.astype('uint8'), self._resolution, cv2.INTER_LANCZOS4)
                 self._buffer.append(frame)
+            else:
+                self._is_recording = False
         
         if not cam.isOpened():
             self._is_recording = False
@@ -41,8 +45,7 @@ class CameraRecorder(Thread):
             print("Nothing to save")
             return
 
-        resolution = (self._buffer[0].shape[0], self._buffer[0].shape[1])
-        writer = cv2.VideoWriter(filename, self._fourcc, self._fps, resolution)
+        writer = cv2.VideoWriter(filename, self._fourcc, self._fps, self._resolution)
 
         for frame in self._buffer:
             writer.write(frame)
