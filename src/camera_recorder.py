@@ -9,12 +9,11 @@ CameraRecorderSpec = namedtuple('CameraRecorderSpec', 'cam_index fourcc fps reso
 
 class CameraRecorder(Thread):
 
-    def __init__(self, cam_index, fourcc, fps, resolution):
+    def __init__(self, cam_index, fourcc, fps):
         super().__init__()
         self._cam_index = cam_index
         self._fourcc = cv2.VideoWriter_fourcc(*fourcc)
         self._fps = fps
-        self._resolution = resolution
         self._is_recording = False
         self._buffer = deque()
 
@@ -26,8 +25,10 @@ class CameraRecorder(Thread):
         self._is_recording = True
 
         while cam.isOpened() and self._is_recording:
-            _, frame = cam.read()
-            self._buffer.append(frame)
+            ret, frame = cam.read()
+            if ret:
+                frame = frame.astype('uint8')
+                self._buffer.append(frame)
         
         if not cam.isOpened():
             self._is_recording = False
@@ -35,7 +36,12 @@ class CameraRecorder(Thread):
         cam.release()
 
     def save_video(self, filename):
-        writer = cv2.VideoWriter(filename, self._fourcc, self._fps, self._resolution)
+        if not self._buffer:
+            print("Nothing to save")
+            return
+
+        resolution = (self._buffer[0].shape[0], self._buffer[0].shape[1])
+        writer = cv2.VideoWriter(filename, self._fourcc, self._fps, resolution)
 
         for frame in self._buffer:
             writer.write(frame)
