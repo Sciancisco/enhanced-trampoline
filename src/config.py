@@ -37,7 +37,7 @@ class CameraConfig:
 class ServerConfig:
 
     FILENAME_SPEC = "{firstname}_{lastname}_{timestamp}"
-    VIDEO_CONTAINER = ".avi"
+    VIDEO_CONTAINER = "avi"
     SAVE_DATA_DIRECTORY = "C:/Users/Test/enhanced-trampoline/local/save"
     SAVE_VIDEO_DIRECTORY = "C:/Users/Test/enhanced-trampoline/local/save/video"
     QIRA_DATA_DIRECTORY = "C:/Users/Test/enhanced-trampoline/local"

@@ -106,16 +106,18 @@ class CameraRecorder(Thread):
             self._stop_recording = True
             logger.warning("Stopping recording before saving.")
 
-        self._buffer_lock.acquire()
+        if self._buffer:
+            self._buffer_lock.acquire()
+            try:
+                writer = cv2.VideoWriter(filename, self._fourcc, self._fps, self._resolution)
 
-        try:
-            writer = cv2.VideoWriter(filename, self._fourcc, self._fps, self._resolution)
+                for frame in self._buffer:
+                    writer.write(frame)
 
-            for frame in self._buffer:
-                writer.write(frame)
+                logger.info(f"Saved {len(self._buffer)} frames to '{filename}'")
 
-            logger.info(f"Saved {len(self._buffer)} frames to '{filename}'")
-
-        finally:
-            writer.release()
-            self._buffer_lock.release()
+            finally:
+                writer.release()
+                self._buffer_lock.release()
+        else:
+            logger.warning("Nothing to save.")
