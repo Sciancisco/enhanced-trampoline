@@ -1,9 +1,8 @@
-
 class QiraConfig:
 
-    ADDRESS = '127.0.0.1:8080'
-    EXE_PATH = 'C:/Program Files/Qira/Qira'
-    WINDOW_TITLE = 'Qira v2.1.0'
+    ADDRESS = "127.0.0.1:8080"
+    EXE_PATH = "C:/Program Files/Qira/Qira"
+    WINDOW_TITLE = "Qira v2.1.0"
 
     WINDOW_SIZE = (1600, 855)
     WINDOW_POSITION = (0, 0)
@@ -31,13 +30,13 @@ class QiraConfig:
 
 class CameraConfig:
 
-    FOURCC = 'DIVX'
+    FOURCC = "DIVX"
     CAMERA_INDEX = 0
 
 
 class ServerConfig:
 
-    FILENAME_SPEC = '{firstname}_{lastname}_{timestamp}'
-    SAVE_DATA_DIRECTORY = 'C:/Users/Test/enhanced-trampoline/local/save'
-    SAVE_VIDEO_DIRECTORY = 'C:/Users/Test/enhanced-trampoline/local/save/video'
-    QIRA_DATA_DIRECTORY = 'C:/Users/Test/enhanced-trampoline/local'
+    FILENAME_SPEC = "{firstname}_{lastname}_{timestamp}"
+    SAVE_DATA_DIRECTORY = "C:/Users/Test/enhanced-trampoline/local/save"
+    SAVE_VIDEO_DIRECTORY = "C:/Users/Test/enhanced-trampoline/local/save/video"
+    QIRA_DATA_DIRECTORY = "C:/Users/Test/enhanced-trampoline/local"

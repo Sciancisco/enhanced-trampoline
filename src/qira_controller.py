@@ -32,8 +32,8 @@ class QiraControllerError(Exception):
 
 
 class QiraController:
-
-    def __init__(self,
+    def __init__(
+        self,
         exe_path,
         window_title,
         address,
@@ -55,7 +55,7 @@ class QiraController:
         routine_state_color,
         review_state_color,
         nousb_state_color,
-        diagnosis_state_color
+        diagnosis_state_color,
     ):
         self._exe_path = exe_path
         self._window_title = window_title
@@ -101,7 +101,7 @@ class QiraController:
             raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         window.activate()
-        pyautogui.press(' ')
+        pyautogui.press(" ")
 
     def _detect_state(self):
         if not (window := self._detect_window()):
@@ -145,13 +145,20 @@ class QiraController:
             window.close()
 
     def send_routine_meta(self, firstname, lastname, timestamp):
-        if self._detect_state() not in {State.READY, State.START, State.ROUTINE, State.REVIEW}:
+        if self._detect_state() not in {
+            State.READY,
+            State.START,
+            State.ROUTINE,
+            State.REVIEW,
+        }:
             raise QiraControllerError(f"Cannot send routine meta in state {state}.")
 
-        data = {'firstname': firstname, 'lastname': lastname, 'timestamp': timestamp}
-        response = requests.post(f'http://{self._address}/routinemeta', json=data)
+        data = {"firstname": firstname, "lastname": lastname, "timestamp": timestamp}
+        response = requests.post(f"http://{self._address}/routinemeta", json=data)
         if not response.ok:
-            raise QiraControllerError(f"An error occured while sending routine meta: {response.status_code} - {response.reason}")
+            raise QiraControllerError(
+                f"An error occured while sending routine meta: {response.status_code} - {response.reason}"
+            )
 
     def select_trampoline(self, trampoline):
         if not (window := self._detect_window()):
@@ -164,7 +171,7 @@ class QiraController:
         window.activate()
 
         pyautogui.click(*self._trampoline_selector_position)
-        time.sleep(.5)
+        time.sleep(0.5)
 
         if trampoline == Trampoline.ONE:
             pyautogui.click(*self._trampoline_1_position)
@@ -186,4 +193,3 @@ class QiraController:
 
     def get_state(self):
         return self._detect_state()
-
