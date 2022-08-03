@@ -28,7 +28,7 @@ class CameraRecorder(Thread):
         self._logger = logger.getChild(repr(self))
 
     def __repr__(self):
-        return f"CameraRecorder@hex(id(self))"
+        return f"CameraRecorder@{hex(id(self))}"
 
     def __del__(self):
         # make sure to release if object deleted at runtime
