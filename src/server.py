@@ -179,10 +179,12 @@ class Server:
     def stop(self):
         if self._listener:
             self._listener.stop()
+            self._listener.join()
             self._listener = None
 
         if self._camera_recorder:
             self._camera_recorder.quit()
+            self._camera_recorder.join()
             self._camera_recorder = None
 
         self._logger.info("Server stopped.")
