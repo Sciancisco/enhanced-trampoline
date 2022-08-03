@@ -41,6 +41,8 @@ server = Server(
     qira_data_directory=ServerConfig.QIRA_DATA_DIRECTORY,
 )
 
+server._athlete_map = {"2": ["Testy", "McTest"], "3": ["Johnny", "Test"], "4": ["Kevin", "McAttester"]}
+
 
 def test_run(qc, tramp):
     print("Ready")
