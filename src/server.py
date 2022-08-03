@@ -75,9 +75,9 @@ class Server:
                 full_path = f"{self._save_video_directory}/{filename}_recovered.{self._video_container}"
                 self._camera_recorder.save_video(full_path)
                 logger.warning(f"Camera was still recording, saved to '{full_path}'")
-            else:
-                self._camera_recorder.start_recording()
-                logger.info("Started video recording...")
+
+            self._camera_recorder.start_recording()
+            logger.info("Started video recording...")
         else:
             logger.critical("Camera recorder is not alive, disabling use of camera.")
             self._use_cam = False
@@ -125,6 +125,8 @@ class Server:
             success = False
             try:
                 from_, to = self._qira_controller.change_state()
+
+                logger.info(f"Qira changed state ({from_}->{to})")
                 success = True
             except Exception as e:
                 logger.exception(str(e))

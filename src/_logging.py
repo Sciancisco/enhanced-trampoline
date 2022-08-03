@@ -16,5 +16,5 @@ def get_console_logger(name, level=GLOBAL_DEFAULT_LEVEL):
     handler.setFormatter(formatter)
 
     logger.addHandler(handler)
-    
+
     return logger
