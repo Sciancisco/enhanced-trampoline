@@ -35,7 +35,7 @@ class CameraRecorder(Thread):
         return self._is_recording
 
     def run(self):
-        logger.debug("Camera recorder running...")
+        logger.info("Camera recorder running...")
 
         while not self._quit:
             time.sleep(0.001)
@@ -52,7 +52,7 @@ class CameraRecorder(Thread):
                 nb_frames = 0
                 start = time.time()
 
-                logger.debug("Recording...")
+                logger.info("Recording...")
 
                 while not self._stop_recording and not self._quit and self._cam.isOpened():
                     ret, frame = self._cam.read()
@@ -69,7 +69,7 @@ class CameraRecorder(Thread):
                 self._buffer_lock.release()
 
                 self._is_recording = False
-                logger.debug("Stopped recording.")
+                logger.info("Stopped recording.")
 
         self._is_recording = False
         self._cam.release()
@@ -103,7 +103,7 @@ class CameraRecorder(Thread):
             for frame in self._buffer:
                 writer.write(frame)
 
-            logger.debug(f"Saved {len(self._buffer)} frames to '{filename}'")
+            logger.info(f"Saved {len(self._buffer)} frames to '{filename}'")
 
         finally:
             writer.release()
