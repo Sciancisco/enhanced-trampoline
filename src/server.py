@@ -8,15 +8,24 @@ from qira_controller import Trampoline, State
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+
+logger.addHandler(handler)
 
 
 class Server:
     def __init__(
         self,
         qira_controller,
-        camera_recorder,
+        camera_index,
+        fourcc,
         filename_spec,
+        video_container,
         save_data_directory,
         save_video_directory,
         qira_data_directory,
@@ -24,13 +33,13 @@ class Server:
     ):
         self._qira_controller = qira_controller
 
-        if use_cam:
-            self._camera_recorder = camera_recorder
-            self._camera_recorder.start()
+        self._camera_index = camera_index
+        self._fourcc = fourcc
+        self._camera_recorder = None
         self._use_cam = use_cam
 
         self._filename_spec = filename_spec
-        self._video_container = ".avi"
+        self._video_container = video_container
         self._save_data_directory = save_data_directory
         self._save_video_directory = save_video_directory
         self._qira_data_directory = qira_data_directory
@@ -160,9 +169,14 @@ class Server:
         if self._listener is None:
             self._listener = keyboard.Listener(on_press=self._on_remote_press)
             self._listener.start()
+        if self._camera_recorder is None or self._camera_recorder.has_quit:
+            self._camera_recorder = CameraRecorder(self._camera_index, self._fourcc)
+            self._camera_recorder.start()
 
     def stop(self):
         if self._listener:
             self._listener.stop()
             self._listener = None
-        self._camera_recorder.quit()
+        if self._camera_recorder:
+            self._camera_recorder.quit()
+            self._camera_recorder = None

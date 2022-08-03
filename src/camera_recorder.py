@@ -7,7 +7,14 @@ import cv2
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+
+logger.addHandler(handler)
 
 
 class CameraRecorder(Thread):
@@ -33,6 +40,10 @@ class CameraRecorder(Thread):
     @property
     def is_recording(self):
         return self._is_recording
+
+    @property
+    def has_quit(self):
+        return self._quit
 
     def run(self):
         logger.info("Camera recorder running...")
