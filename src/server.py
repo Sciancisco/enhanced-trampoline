@@ -1,3 +1,4 @@
+import logging
 from threading import Thread
 import time
 
@@ -5,6 +6,10 @@ from pynput import keyboard
 
 from qira_controller import Trampoline, State
 from camera_recorder import CameraRecorder
+
+
+logger = logging.getLogger(__name__)
+logger.basicConfig(level=logging.DEBUG)
 
 
 class Server:
@@ -22,6 +27,7 @@ class Server:
 
         self._camera_recorder = camera_recorder
         self._recording_thread = None
+        self._video_container = '.avi'
 
         self._filename_spec = filename_spec
         self._save_data_directory = save_data_directory
@@ -39,6 +45,7 @@ class Server:
 
     def _send_routine_meta(self):
         try:
+            logger.info(f"Sending routine meta: {self._firstname} {self._lastname} {self._timestamp}")
             self._qira_controller.send_routine_meta(
                 firstname=self._firstname,
                 lastname=self._lastname,
@@ -46,7 +53,7 @@ class Server:
             )
             return True
         except Exception as e:
-            print(e)
+            logger.exception(str(e))
             return False
 
     def _start_video_recording(self):
@@ -57,10 +64,13 @@ class Server:
             # if Qira's state changes and the server never sees the transition (REVIEW, READY)
             self._camera_recorder.stop_recording()
             filename = self._filename_spec.format(firstname=self._firstname, lastname=self._lastname, timestamp=self._timestamp)
-            self._camera_recorder.save_video(f'{self._save_video_directory}/{filename}_recovered.avi')
+            full_path = f'{self._save_video_directory}/{filename}_recovered.{self._video_container}'
+            self._camera_recorder.save_video(full_path)
+            logger.warning(f"Camera was still recording, saved to '{full_path}'")
 
         self._recording_thread = Thread(target=self._camera_recorder.start_recording)
         self._recording_thread.start()
+        logger.debug("Started new video recording thread")
 
     def _stop_video_recording(self):
         if not self._use_cam:
@@ -68,6 +78,7 @@ class Server:
 
         if self._recording_thread:
             self._camera_recorder.stop_recording()
+            logger.debug("Stoped video recording thread")
 
     def _save_video(self):
         if not self._use_cam:
@@ -75,8 +86,12 @@ class Server:
 
         if self._recording_thread:
             self._camera_recorder.stop_recording()
+            logging.warning("Camera was still recording, stoped before saving")
+        
         filename = self._filename_spec.format(firstname=self._firstname, lastname=self._lastname, timestamp=self._timestamp)
-        self._camera_recorder.save_video(f'{self._save_video_directory}/{filename}.avi')
+        full_path = f'{self._save_video_directory}/{filename}.avi'
+        self._camera_recorder.save_video(full_path)
+        logger.debug(f"Saved video to '{full_path}'")
 
     def _on_remote_press(self, key):  # also work for keyboard presses since the remote is basically a keyboard
         try:
@@ -95,7 +110,7 @@ class Server:
                 from_, to = self._qira_controller.change_state()
                 success = True
             except Exception as e:
-                print(e)
+                logger.exception(str(e))
 
             if success:
                 if from_ == State.READY and to == State.START:
@@ -115,7 +130,7 @@ class Server:
                 try:
                     self._qira_controller.select_trampoline(Trampoline.ONE)
                 except Exception as e:
-                    print(e)
+                    logger.exception(str(e))
 
         elif k == 'media_next':
             if self._qira_controller.get_state() == State.READY:
