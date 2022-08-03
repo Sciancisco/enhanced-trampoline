@@ -12,7 +12,7 @@ def get_console_logger(name, level=GLOBAL_DEFAULT_LEVEL):
     handler = logging.StreamHandler()
     handler.setLevel(level)
 
-    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter("%(name)s:%(levelname)s: %(message)s")
     handler.setFormatter(formatter)
 
     logger.addHandler(handler)

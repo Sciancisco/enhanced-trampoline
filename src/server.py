@@ -43,6 +43,11 @@ class Server:
         self._firstname = ""
         self._lastname = ""
 
+        self._logger = logger.getChild(repr(self))
+
+    def __repr__(self):
+        return f"Server@{hex(id(self))}"
+
     def _send_routine_meta(self):
         try:
             self._qira_controller.send_routine_meta(
@@ -50,13 +55,13 @@ class Server:
                 lastname=self._lastname,
                 timestamp=self._timestamp,
             )
-            logger.info(
-                f"Sent routine meta: "
-                "firstname='{self._firstname}' lastname='{self._lastname}' timestamp='{self._timestamp}'."
+            self._logger.info(
+                "Sent routine meta: "
+                f"firstname='{self._firstname}' lastname='{self._lastname}' timestamp='{self._timestamp}'."
             )
             return True
         except Exception as e:
-            logger.exception(str(e))
+            self._logger.exception(str(e))
             return False
 
     def _start_video_recording(self):
@@ -74,12 +79,12 @@ class Server:
                 )
                 full_path = f"{self._save_video_directory}/{filename}_recovered.{self._video_container}"
                 self._camera_recorder.save_video(full_path)
-                logger.warning(f"Camera was still recording, saved to '{full_path}'")
+                self._logger.warning(f"Camera was still recording, saved to '{full_path}'")
 
             self._camera_recorder.start_recording()
-            logger.info("Started video recording...")
+            self._logger.info("Started video recording...")
         else:
-            logger.critical("Camera recorder is not alive, disabling use of camera.")
+            self._logger.critical("Camera recorder is not alive, disabling use of camera.")
             self._use_cam = False
 
     def _stop_video_recording(self):
@@ -88,9 +93,9 @@ class Server:
 
         if self._camera_recorder.is_alive():
             self._camera_recorder.stop_recording()
-            logger.info("Stopped video recording.")
+            self._logger.info("Stopped video recording.")
         else:
-            logger.critical("Camera recorder is not alive, disabling use of camera.")
+            self._logger.critical("Camera recorder is not alive, disabling use of camera.")
             self._use_cam = False
 
     def _save_video(self):
@@ -105,7 +110,7 @@ class Server:
         full_path = f"{self._save_video_directory}/{filename}.{self._video_container}"
         self._camera_recorder.save_video(full_path)
 
-        logger.info(f"Saved video to '{full_path}'.")
+        self._logger.info(f"Saved video to '{full_path}'.")
 
     def _on_remote_press(self, key):  # also work for keyboard presses since the remote is basically a keyboard
         try:
@@ -126,10 +131,10 @@ class Server:
             try:
                 from_, to = self._qira_controller.change_state()
 
-                logger.info(f"Qira changed state ({from_}->{to})")
+                self._logger.info(f"Qira changed state ({from_}->{to})")
                 success = True
             except Exception as e:
-                logger.exception(str(e))
+                self._logger.exception(str(e))
 
             if success:
                 if to == State.START:
@@ -149,7 +154,7 @@ class Server:
                 try:
                     self._qira_controller.select_trampoline(Trampoline.ONE)
                 except Exception as e:
-                    logger.exception(str(e))
+                    self._logger.exception(str(e))
 
         elif k == "media_next":
             if self._qira_controller.get_state() == State.READY:
@@ -169,7 +174,7 @@ class Server:
             self._listener = keyboard.Listener(on_press=self._on_remote_press)
             self._listener.start()
 
-        logger.info("Server started.")
+        self._logger.info("Server started.")
 
     def stop(self):
         if self._listener:
@@ -180,4 +185,4 @@ class Server:
             self._camera_recorder.quit()
             self._camera_recorder = None
 
-        logger.info("Server stopped.")
+        self._logger.info("Server stopped.")

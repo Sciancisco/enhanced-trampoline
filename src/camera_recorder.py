@@ -25,6 +25,11 @@ class CameraRecorder(Thread):
         self._is_recording = False
         self._buffer_lock = Lock()
 
+        self._logger = logger.getChild(repr(self))
+
+    def __repr__(self):
+        return f"CameraRecorder@hex(id(self))"
+
     def __del__(self):
         # make sure to release if object deleted at runtime
         self._cam.release()
@@ -38,7 +43,7 @@ class CameraRecorder(Thread):
         return self._quit
 
     def run(self):
-        logger.info("Camera recorder running...")
+        self._logger.info("Camera recorder running...")
 
         while not self._quit:
             time.sleep(0.001)
@@ -55,7 +60,7 @@ class CameraRecorder(Thread):
                 nb_frames = 0
                 start = time.time()
 
-                logger.info("Recording...")
+                self._logger.info("Recording...")
 
                 while not self._stop_recording and not self._quit and self._cam.isOpened():
                     ret, frame = self._cam.read()
@@ -72,17 +77,17 @@ class CameraRecorder(Thread):
                 self._buffer_lock.release()
 
                 self._is_recording = False
-                logger.info("Stopped recording.")
+                self._logger.info("Stopped recording.")
 
         self._is_recording = False
         self._cam.release()
-        logger.warning("Camera recorder quit.")
+        self._logger.warning("Camera recorder quit.")
 
     def start_recording(self):
         if not self._is_recording:
             self._start_recording = True
         else:
-            logger.warning("Already recording, won't restart.")
+            self._logger.warning("Already recording, won't restart.")
 
     def stop_recording(self):
         self._stop_recording = True
@@ -91,12 +96,12 @@ class CameraRecorder(Thread):
         if self.is_alive():
             self._quit = True
         else:
-            logger.warning("Tried to quit a non-running camera recorder.")
+            self._logger.warning("Tried to quit a non-running camera recorder.")
 
     def save_video(self, filename):
         if self._buffer_lock.locked() or self._is_recording:
             self._stop_recording = True
-            logger.warning("Stopping recording before saving.")
+            self._logger.warning("Stopping recording before saving.")
 
         if self._buffer:
             self._buffer_lock.acquire()
@@ -106,10 +111,10 @@ class CameraRecorder(Thread):
                 for frame in self._buffer:
                     writer.write(frame)
 
-                logger.info(f"Saved {len(self._buffer)} frames to '{filename}'")
+                self._logger.info(f"Saved {len(self._buffer)} frames to '{filename}'")
 
             finally:
                 writer.release()
                 self._buffer_lock.release()
         else:
-            logger.warning("Nothing to save.")
+            self._logger.warning("Nothing to save.")

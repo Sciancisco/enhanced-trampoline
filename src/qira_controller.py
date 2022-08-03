@@ -1,6 +1,6 @@
-import subprocess
-import time
 from enum import Enum
+import time
+import subprocess
 
 import pyautogui
 import pygetwindow as gw
@@ -104,7 +104,7 @@ class QiraController:
         self._position_window()
         window.activate()
 
-        time.sleep(.005)
+        time.sleep(0.005)
         screenshot = pyautogui.screenshot()
 
         if screenshot.getpixel(self._ready_state_position) == self._ready_state_color:
