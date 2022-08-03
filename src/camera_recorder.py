@@ -1,20 +1,12 @@
 from collections import deque, namedtuple
-import logging
 from threading import Lock, Thread
 import time
 
 import cv2
 
+import _logging
 
-logger = logging.getLogger(__name__)
-
-handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
-
-logger.addHandler(handler)
+logger = _logging.get_console_logger(__name__)
 
 
 class CameraRecorder(Thread):
