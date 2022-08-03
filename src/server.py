@@ -132,16 +132,16 @@ class Server:
                 logger.exception(str(e))
 
             if success:
-                if from_ == State.READY and to == State.START:
+                if to == State.START:
                     self._timestamp = time.strftime("%Y%m%d_%H%M%S")
                     self._send_routine_meta()
                     self._start_video_recording()
 
-                elif from_ == State.ROUTINE and to == State.REVIEW:
+                elif to == State.REVIEW:
                     # TODO: handle when Qira changes from ROUTINE to REVIEW automatically
                     self._stop_video_recording()
 
-                elif from_ == State.REVIEW and to == State.READY:
+                elif to == State.READY:
                     self._save_video()
 
         elif k == "media_previous":

@@ -101,7 +101,10 @@ class QiraController:
         if not (window := self._detect_window()):
             return State.CLOSED
 
+        self._position_window()
         window.activate()
+
+        time.sleep(.005)
         screenshot = pyautogui.screenshot()
 
         if screenshot.getpixel(self._ready_state_position) == self._ready_state_color:
