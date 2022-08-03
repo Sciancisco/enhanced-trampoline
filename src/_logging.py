@@ -1,7 +1,9 @@
 import logging
 import sys
 
+
 LEVEL = logging.DEBUG
+
 
 def get_console_logger(name, level=LEVEL):
     logger = logging.getLogger(__name__)
