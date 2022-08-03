@@ -35,8 +35,11 @@ class CameraRecorder(Thread):
         return self._is_recording
 
     def run(self):
+        logger.debug("Camera recorder running...")
 
-        while not self._quit and time.sleep(0.001):
+        while not self._quit:
+            time.sleep(0.001)
+
             if self._start_recording and self._buffer_lock.acquire():
                 self._start_recording = False
                 self._stop_recording = False
