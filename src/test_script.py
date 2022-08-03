@@ -9,8 +9,6 @@ qc = QiraController(
     QiraConfig.EXE_PATH,
     QiraConfig.WINDOW_TITLE,
     QiraConfig.ADDRESS,
-    QiraConfig.WINDOW_SIZE,
-    QiraConfig.WINDOW_POSITION,
     QiraConfig.TRAMPOLINE_SELECTOR_POSITION,
     QiraConfig.TRAMPOLINE_1_POSITION,
     QiraConfig.TRAMPOLINE_2_POSITION,

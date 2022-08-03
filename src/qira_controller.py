@@ -37,8 +37,6 @@ class QiraController:
         exe_path,
         window_title,
         address,
-        window_size,
-        window_position,
         trampoline_selector_position,
         trampoline_1_position,
         trampoline_2_position,
@@ -60,9 +58,6 @@ class QiraController:
         self._exe_path = exe_path
         self._window_title = window_title
         self._address = address
-
-        self._window_size = window_size
-        self._window_position = window_position
 
         self._trampoline_selector_position = trampoline_selector_position
         self._trampoline_1_position = trampoline_1_position
@@ -93,8 +88,7 @@ class QiraController:
         if not (window := self._detect_window()):
             raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
-        window.moveTo(*self._window_position)
-        window.resizeTo(*self._window_size)
+        window.maximize()
 
     def _press_space(self):
         if not (window := self._detect_window()):
