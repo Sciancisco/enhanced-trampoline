@@ -158,17 +158,24 @@ class Server:
 
     def start(self):
         self._qira_controller.launch()
-        if self._listener is None:
-            self._listener = keyboard.Listener(on_press=self._on_remote_press)
-            self._listener.start()
+
         if self._camera_recorder is None or self._camera_recorder.has_quit:
             self._camera_recorder = CameraRecorder(self._camera_index, self._fourcc)
             self._camera_recorder.start()
+
+        if self._listener is None:
+            self._listener = keyboard.Listener(on_press=self._on_remote_press)
+            self._listener.start()
+
+        logger.info("Server started.")
 
     def stop(self):
         if self._listener:
             self._listener.stop()
             self._listener = None
+
         if self._camera_recorder:
             self._camera_recorder.quit()
             self._camera_recorder = None
+
+        logger.info("Server stopped.")
