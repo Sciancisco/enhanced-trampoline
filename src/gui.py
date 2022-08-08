@@ -22,6 +22,7 @@ def restart():
 
 
 def live_feed_toggle():
+    global live_feed_thread
     if live_feed_thread and live_feed_thread.is_alive():
         btn_live_feed.config(text="Start live feed")
         live_feed_on.unset()
