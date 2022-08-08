@@ -66,7 +66,7 @@ class CameraRecorder(Thread):
                     ret, frame = self._cam.read()
                     if ret:
                         # https://github.com/ContinuumIO/anaconda-issues/issues/223
-                        frame = cv2.resize(frame.astype("uint8"), self._resolution, cv2.INTER_LANCZOS4)
+                        frame = frame.astype("uint8")
                         self._buffer.append(frame)
                         nb_frames += 1
                     else:

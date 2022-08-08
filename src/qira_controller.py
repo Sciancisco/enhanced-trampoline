@@ -184,6 +184,7 @@ class QiraController:
     def change_state(self):
         from_ = self._detect_state()
         self._press_space()
+        time.sleep(0.05)  # add delay because sometimes Qira is slower than detection
         to = self._detect_state()
 
         return from_, to
