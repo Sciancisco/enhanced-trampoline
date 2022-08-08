@@ -1,40 +1,39 @@
-class QiraConfig:
+LoggingConfig = dict(LOG_DIRECTORY="")
 
-    ADDRESS = "127.0.0.1:8080"
-    EXE_PATH = "C:/Program Files/Qira/Qira"
-    WINDOW_TITLE = "Qira v2.1.0"
-
-    TRAMPOLINE_SELECTOR_POSITION = (230, 200)  # positions on a 1600x900 TN panel
-    TRAMPOLINE_1_POSITION = (230, 225)
-    TRAMPOLINE_2_POSITION = (230, 245)
-    TRAMPOLINE_12_POSITION = (230, 260)
-    TRAMPOLINE_AUTO_POSITION = (230, 280)
-
-    READY_STATE_POSITION = (30, 175)
-    START_STATE_POSITION = (30, 210)
-    ROUTINE_STATE_POSITION = (30, 240)
-    REVIEW_STATE_POSITION = (30, 280)
-    NOUSB_STATE_POSITION = (30, 130)
-    DIAGNOSIS_STATE_POSITION = (30, 310)
-
-    READY_STATE_COLOR = (70, 170, 110)
-    START_STATE_COLOR = (220, 220, 90)
-    ROUTINE_STATE_COLOR = (230, 90, 90)
-    REVIEW_STATE_COLOR = (50, 100, 200)
-    NOUSB_STATE_COLOR = (230, 90, 90)
-    DIAGNOSIS_STATE_COLOR = (50, 100, 200)
-
-
-class CameraConfig:
-
-    FOURCC = "DIVX"
-    CAMERA_INDEX = 0
+QiraConfig = dict(
+    address="127.0.0.1:8080",
+    exe_path="C:/Program Files/Qira/Qira",
+    window_title="Qira v2.1.0",
+    trampoline_selector_position=(230, 200),  # positions on a 1600x900 TN panel
+    trampoline_1_position=(230, 225),
+    trampoline_2_position=(230, 245),
+    trampoline_12_position=(230, 260),
+    trampoline_auto_position=(230, 280),
+    ready_state_position=(30, 175),
+    start_state_position=(30, 210),
+    routine_state_position=(30, 240),
+    review_state_position=(30, 280),
+    nousb_state_position=(30, 130),
+    diagnosis_state_position=(30, 310),
+    ready_state_color=(70, 170, 110),
+    start_state_color=(220, 220, 90),
+    routine_state_color=(230, 90, 90),
+    review_state_color=(50, 100, 200),
+    nousb_state_color=(230, 90, 90),
+    diagnosis_state_color=(50, 100, 200),
+)
 
 
-class ServerConfig:
+CameraConfig = dict(
+    fourcc="DIVX",
+    camera_index=0,
+)
 
-    FILENAME_SPEC = "{firstname}_{lastname}_{timestamp}"
-    VIDEO_CONTAINER = "avi"
-    SAVE_DATA_DIRECTORY = "C:/Users/Test/enhanced-trampoline/local/save"
-    SAVE_VIDEO_DIRECTORY = "C:/Users/Test/enhanced-trampoline/local/save/video"
-    QIRA_DATA_DIRECTORY = "C:/Users/Test/enhanced-trampoline/local"
+
+ServerConfig = dict(
+    filename_spec="{firstname}_{lastname}_{timestamp}",
+    video_container="avi",
+    save_data_directory="C:/Users/Test/enhanced-trampoline/local/save",
+    save_video_directory="C:/Users/Test/enhanced-trampoline/local/save/video",
+    qira_data_directory="C:/Users/Test/enhanced-trampoline/local",
+)

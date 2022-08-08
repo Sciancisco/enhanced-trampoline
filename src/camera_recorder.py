@@ -10,7 +10,7 @@ logger = _logging.get_console_logger(__name__)
 
 
 class CameraRecorder(Thread):
-    def __init__(self, cam_index, fourcc):
+    def __init__(self, camera_index, fourcc):
         super().__init__()
 
         self._cam = cv2.VideoCapture(cam_index)
@@ -65,7 +65,6 @@ class CameraRecorder(Thread):
                 while not self._stop_recording and not self._quit and self._cam.isOpened():
                     ret, frame = self._cam.read()
                     if ret:
-                        # https://github.com/ContinuumIO/anaconda-issues/issues/223
                         frame = frame.astype("uint8")
                         self._buffer.append(frame)
                         nb_frames += 1
@@ -106,6 +105,8 @@ class CameraRecorder(Thread):
         if self._buffer:
             self._buffer_lock.acquire()
             try:
+                # of great help to figure out VideoWriter's quirks
+                # https://github.com/ContinuumIO/anaconda-issues/issues/223
                 writer = cv2.VideoWriter(filename, self._fourcc, self._fps, self._resolution)
 
                 for frame in self._buffer:

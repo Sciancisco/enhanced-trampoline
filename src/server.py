@@ -4,7 +4,7 @@ from pynput import keyboard
 
 import _logging
 from camera_recorder import CameraRecorder
-from qira_controller import Trampoline, State
+from qira_controller import QiraController, Trampoline, State
 
 
 logger = _logging.get_console_logger(__name__)
@@ -13,9 +13,8 @@ logger = _logging.get_console_logger(__name__)
 class Server:
     def __init__(
         self,
-        qira_controller,
-        camera_index,
-        fourcc,
+        qira_controller_config,
+        camera_recorder_config,
         filename_spec,
         video_container,
         save_data_directory,
@@ -23,10 +22,9 @@ class Server:
         qira_data_directory,
         use_cam=True,
     ):
-        self._qira_controller = qira_controller
+        self._qira_controller = QiraController(**qira_controller_config)
 
-        self._camera_index = camera_index
-        self._fourcc = fourcc
+        self._camera_recorder_config = camera_recorder_config
         self._camera_recorder = None
         self._use_cam = use_cam
 
@@ -167,7 +165,7 @@ class Server:
         self._qira_controller.launch()
 
         if self._camera_recorder is None or self._camera_recorder.has_quit:
-            self._camera_recorder = CameraRecorder(self._camera_index, self._fourcc)
+            self._camera_recorder = CameraRecorder(**self._camera_recorder_config)
             self._camera_recorder.start()
 
         if self._listener is None:
