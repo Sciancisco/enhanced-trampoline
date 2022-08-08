@@ -45,6 +45,10 @@ class CameraRecorder(Thread):
     def has_quit(self):
         return self._quit
 
+    @property
+    def last_frame(self):
+        return self._buffer[-1]
+
     def run(self):
         self._logger.info("Camera recorder running...")
 

@@ -161,6 +161,13 @@ class Server:
                 except Exception as e:
                     print(e)
 
+    @property
+    def last_recorded_frame(self):
+        if self._camera_recorder:
+            return self._camera_recorder.last_frame
+        else:
+            return None
+
     def start(self):
         self._qira_controller.launch()
 
