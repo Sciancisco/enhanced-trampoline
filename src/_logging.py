@@ -8,12 +8,14 @@ GLOBAL_LEVEL = LoggingConfig["global_level"]
 LOG_FILE = LoggingConfig["log_file"]
 
 
-logging.basicConfig(filename=LOG_FILE)
-
-
-def get_console_logger(name, level=GLOBAL_LEVEL):
+def get_console_logger(name, log_file=LOG_FILE, level=GLOBAL_LEVEL):
     logger = logging.getLogger(name)
     logger.setLevel(level)
+
+    if log_file:
+        handler = logging.FileHandler(log_file)
+        handler.setLevel(level)
+        logger.addHandler(handler)
 
     handler = logging.StreamHandler()
     handler.setLevel(level)
