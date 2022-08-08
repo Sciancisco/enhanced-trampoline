@@ -20,7 +20,7 @@ def get_console_logger(name, log_file=LOG_FILE, level=GLOBAL_LEVEL):
     handler = logging.StreamHandler()
     handler.setLevel(level)
 
-    formatter = logging.Formatter("%(name)s:%(levelname)s: %(message)s")
+    formatter = logging.Formatter("%(asctime)s %(name)s:%(levelname)s: %(message)s")
     handler.setFormatter(formatter)
 
     logger.addHandler(handler)
