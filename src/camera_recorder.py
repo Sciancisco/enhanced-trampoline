@@ -15,7 +15,10 @@ class CameraRecorder(Thread):
 
         self._cam = cv2.VideoCapture(camera_index)
         self._fourcc = cv2.VideoWriter_fourcc(*fourcc)  # TODO: better use DIVX for windows?
-        self._resolution = (int(self._cam.get(3)), int(self._cam.get(4)))
+        self._resolution = (
+            int(self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+            int(self._cam.get(cv2.CAP_PROP_FRAME_WIDTH)),
+        )
         self._fps = None
         self._buffer = deque()
 
@@ -65,7 +68,8 @@ class CameraRecorder(Thread):
                 while not self._stop_recording and not self._quit and self._cam.isOpened():
                     ret, frame = self._cam.read()
                     if ret:
-                        frame = frame.astype("uint8")
+                        # camera is sideways
+                        frame = cv2.rotate(frame.astype("uint8"), cv2.ROTATE_90_CLOCKWISE)
                         self._buffer.append(frame)
                         nb_frames += 1
                     else:
