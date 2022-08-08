@@ -1,11 +1,17 @@
 import logging
 import sys
 
+from config import LoggingConfig
 
-GLOBAL_DEFAULT_LEVEL = logging.DEBUG
+
+GLOBAL_LEVEL = LoggingConfig["global_level"]
+LOG_FILE = LoggingConfig["log_file"]
 
 
-def get_console_logger(name, level=GLOBAL_DEFAULT_LEVEL):
+logging.basicConfig(filename=LOG_FILE)
+
+
+def get_console_logger(name, level=GLOBAL_LEVEL):
     logger = logging.getLogger(name)
     logger.setLevel(level)
 

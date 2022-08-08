@@ -1,4 +1,6 @@
-LoggingConfig = dict(LOG_DIRECTORY="")
+from logging import NOTSET, DEBUG, INFO, WARNING, CRITICAL
+
+LoggingConfig = dict(global_level=DEBUG, log_file=None)
 
 QiraConfig = dict(
     address="127.0.0.1:8080",
