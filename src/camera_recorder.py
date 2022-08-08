@@ -13,7 +13,7 @@ class CameraRecorder(Thread):
     def __init__(self, camera_index, fourcc):
         super().__init__()
 
-        self._cam = cv2.VideoCapture(cam_index)
+        self._cam = cv2.VideoCapture(camera_index)
         self._fourcc = cv2.VideoWriter_fourcc(*fourcc)  # TODO: better use DIVX for windows?
         self._resolution = (int(self._cam.get(3)), int(self._cam.get(4)))
         self._fps = None
