@@ -25,7 +25,7 @@ def live_feed_toggle():
     global live_feed_thread
     if live_feed_thread and live_feed_thread.is_alive():
         btn_live_feed.config(text="Start live feed")
-        live_feed_on.unset()
+        live_feed_on.clear()
     else:
         btn_live_feed.config(text="Stop live feed")
         live_feed_on.set()
@@ -35,13 +35,14 @@ def live_feed_toggle():
 
 def display_live_feed():
     while live_feed_on.is_set():
-        cv2.imshow(server.last_recorded_frame)
+        cv2.imshow("Live feed", server.last_recorded_frame)
         time.sleep(1 / 30)
 
     cv2.destroyAllWindows()
 
 
 def kill_all():
+    live_feed_on.clear()
     server.stop()
     root.destroy()
 
@@ -55,7 +56,8 @@ ttk.Button(frame, text="Stop", command=server.stop).grid(column=2, row=0)
 ttk.Button(frame, text="Restart", command=restart).grid(column=3, row=0)
 
 ttk.Label(frame, text="Camera").grid(column=0, row=1)
-btn_live_feed = ttk.Button(frame, text="Start live feed", command=live_feed_toggle).grid(column=1, row=1)
+btn_live_feed = ttk.Button(frame, text="Start live feed", command=live_feed_toggle)
+btn_live_feed.grid(column=1, row=1)
 
 root.title("INS enhanced trampoline")
 root.protocol("WM_DELETE_WINDOW", kill_all)
