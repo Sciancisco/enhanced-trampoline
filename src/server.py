@@ -119,7 +119,7 @@ class Server:
         if (
             k in {"0", "2", "3", "4", "5", "6", "7", "8", "9"}
             and k in self._athlete_map
-            and self._qira_controller.get_state() in {State.READY, State.START, State.ROUTINE, State.REVIEW}
+            and self._qira_controller.state in {State.READY, State.START, State.ROUTINE, State.REVIEW}
         ):
             self._firstname, self._lastname = self._athlete_map[k]
             self._send_routine_meta()
@@ -144,18 +144,18 @@ class Server:
                     # TODO: handle when Qira changes from ROUTINE to REVIEW automatically
                     self._stop_video_recording()
 
-                elif to == State.READY:
+                elif from_ == State.REVIEW and to == State.READY:
                     self._save_video()
 
         elif k == "media_previous":
-            if self._qira_controller.get_state() == State.READY:
+            if self._qira_controller.state == State.READY:
                 try:
                     self._qira_controller.select_trampoline(Trampoline.ONE)
                 except Exception as e:
                     self._logger.exception(str(e))
 
         elif k == "media_next":
-            if self._qira_controller.get_state() == State.READY:
+            if self._qira_controller.state == State.READY:
                 try:
                     self._qira_controller.select_trampoline(Trampoline.TWO)
                 except Exception as e:

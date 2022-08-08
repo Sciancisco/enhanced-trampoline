@@ -122,6 +122,10 @@ class QiraController:
         else:
             return State.UNDEFINED
 
+    @property
+    def state(self):
+        return self._detect_state()
+
     def launch(self):
         if not (window := self._detect_window()):
             subprocess.Popen(self._exe_path)
@@ -188,6 +192,3 @@ class QiraController:
         to = self._detect_state()
 
         return from_, to
-
-    def get_state(self):
-        return self._detect_state()
