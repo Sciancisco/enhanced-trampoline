@@ -23,10 +23,10 @@ def restart():
 
 def live_feed_toggle():
     if live_feed_thread and live_feed_thread.is_alive():
-        btn_live_feed.config(relief="raised")
+        btn_live_feed.config(text="Start live feed")
         live_feed_on.unset()
     else:
-        btn_live_feed.config(relief="sunken")
+        btn_live_feed.config(text="Stop live feed")
         live_feed_on.set()
         live_feed_thread = Thread(target=display_live_feed)
         live_feed_thread.start()
@@ -54,7 +54,7 @@ ttk.Button(frame, text="Stop", command=server.stop).grid(column=2, row=0)
 ttk.Button(frame, text="Restart", command=restart).grid(column=3, row=0)
 
 ttk.Label(frame, text="Camera").grid(column=0, row=1)
-btn_live_feed = ttk.Button(frame, text="Live feed", relief="raised", command=live_feed_toggle).grid(column=1, row=1)
+btn_live_feed = ttk.Button(frame, text="Start live feed", command=live_feed_toggle).grid(column=1, row=1)
 
 root.title("INS enhanced trampoline")
 root.protocol("WM_DELETE_WINDOW", kill_all)
