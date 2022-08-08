@@ -26,14 +26,14 @@ def kill_all():
 frame = ttk.Frame(root, padding=10)
 frame.grid()
 
-ttk.Label(frame, text="Server").grid(0, 0)
-ttk.Button(frame, text="Start", command=server.start).grid(1, 0)
-ttk.Button(frame, text="Stop", command=server.stop).grid(2, 0)
-ttk.Button(frame, text="Restart", command=restart).grid(3, 0)
+ttk.Label(frame, text="Server").grid(column=0, row=0)
+ttk.Button(frame, text="Start", command=server.start).grid(column=1, row=0)
+ttk.Button(frame, text="Stop", command=server.stop).grid(column=2, row=0)
+ttk.Button(frame, text="Restart", command=restart).grid(column=3, row=0)
 
-ttk.Label(frame, text="Camera").grid(0, 1)
-ttk.Button(frame, text="Live feed", command=live_feed).grid(1, 1)
+ttk.Label(frame, text="Camera").grid(column=0, row=1)
+ttk.Button(frame, text="Live feed", command=live_feed).grid(column=1, row=1)
 
-ttk.Button(frame, text="Quit", command=kill_all).grid(2, 0)
+ttk.Button(frame, text="Quit", command=kill_all).grid(column=2, row=0)
 
 root.mainloop()
