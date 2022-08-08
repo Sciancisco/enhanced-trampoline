@@ -175,14 +175,17 @@ class Server:
         self._logger.info("Server started.")
 
     def stop(self):
-        if self._listener:
+        if listener := bool(self._listener):
             self._listener.stop()
             self._listener.join()
             self._listener = None
 
-        if self._camera_recorder:
+        if cam_recorder := bool(self._camera_recorder):
             self._camera_recorder.quit()
             self._camera_recorder.join()
             self._camera_recorder = None
 
-        self._logger.info("Server stopped.")
+        if listener or cam_recorder:
+            self._logger.info("Server stopped.")
+        else:
+            self._logger.info("Already stopped.")
