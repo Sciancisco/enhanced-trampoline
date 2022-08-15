@@ -171,6 +171,7 @@ class Server:
         ):
             self._logger.info("Starting Qira watcher...")
             self._qira_controller = QiraController(**self._qira_controller_config)
+            self._qira_controller.start_watching()
 
         self._qira_controller.launch()
         self._qira_controller.add_callback(self._on_state_transition)
@@ -209,7 +210,7 @@ class Server:
         if watcher := bool(self._qira_controller):
             self._logger.info("Stopping Qira watcher...")
             self._qira_controller.stop_watching()
-            if not self._qira_controller.was_started:
+            if self._qira_controller.was_started:
                 self._qira_controller.join()
             self._qira_controller = None
 
