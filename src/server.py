@@ -21,7 +21,8 @@ class Server:
         save_video_directory,
         qira_data_directory,
     ):
-        self._qira_controller = QiraController(**qira_controller_config)
+        self._qira_controller_config = qira_controller_config
+        self._qira_controller = None
 
         self._camera_recorder_config = camera_recorder_config
         self._camera_recorder = None
@@ -43,7 +44,7 @@ class Server:
         self._logger = logger.getChild(repr(self))
 
     def __repr__(self):
-        return f"Server@{hex(id(self))}"
+        return f"Server@{hex(id(self))[-7:]}"
 
     def _send_routine_meta(self):
         try:
@@ -109,6 +110,19 @@ class Server:
 
         self._logger.info(f"Saved video to '{full_path}'.")
 
+    def _on_state_transition(self, from_, to):
+        if to == State.REVIEW:
+            self._stop_recording()
+
+        if from_ == State.REVIEW:
+            self._stop_recording()
+            self._save_video()
+
+        if to == State.START:
+            self._timestamp = time.strftime("%Y%m%d_%H%M%S")
+            self._start_video_recording()
+            self._send_routine_meta()
+
     def _on_remote_press(self, key):  # also work for keyboard presses since the remote is basically a keyboard
         try:
             k = key.char
@@ -124,29 +138,10 @@ class Server:
             self._send_routine_meta()
 
         elif k == "media_play_pause":
-            success = False
             try:
-                from_, to = self._qira_controller.change_state()  # TODO: store last transition to compare. Done?
-                success = from_ != to
-
-                self._logger.info(f"Qira changed state ({from_}->{to}) (success: {success})")
-
+                from_, to = self._qira_controller.change_state()
             except Exception as e:
                 self._logger.exception(str(e))
-
-            if success:
-                if to == State.START:
-                    self._timestamp = time.strftime("%Y%m%d_%H%M%S")
-                    self._send_routine_meta()
-                    self._start_video_recording()
-
-                elif to == State.REVIEW:
-                    # TODO: handle when Qira changes from ROUTINE to REVIEW automatically. Done?
-                    self._stop_video_recording()
-
-                elif from_ == State.REVIEW and to == State.READY:
-                    self._stop_video_recording()
-                    self._save_video()
 
         elif k == "media_previous":
             if self._qira_controller.state == State.READY:
@@ -170,7 +165,13 @@ class Server:
             return None
 
     def start(self, use_cam=True):
+        if self._qira_controller is None or self._qira_controller.has_quit:
+            self._logger.info("Starting Qira watcher...")
+            self._qira_controller = QiraController(**self._qira_controller_config)
+
         self._qira_controller.launch()
+        self._qira_controller.add_callback(self._on_state_transition)
+
         self._use_cam = use_cam  # set for real here
 
         if self._use_cam and self._camera_recorder is None or self._camera_recorder.has_quit:
@@ -202,7 +203,13 @@ class Server:
             self._camera_recorder.join()
             self._camera_recorder = None
 
-        if listener or cam_recorder:
+        if watcher := bool(self._qira_controller):
+            self._logger.info("Stopping Qira watcher...")
+            self._qira_controller.stop_watching()
+            self._qira_controller.join()
+            self._qira_controller = None
+
+        if listener or cam_recorder or watcher:
             self._logger.info("Server stopped.")
         else:
             self._logger.info("Already stopped.")

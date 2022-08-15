@@ -1,10 +1,16 @@
 from enum import Enum
+from threading import Thread
 import time
 import subprocess
 
 import pyautogui
 import pygetwindow as gw
 import requests
+
+import _logging
+
+
+logger = _logging.get_console_logger(__name__)
 
 
 class State(Enum):
@@ -31,12 +37,13 @@ class QiraControllerError(Exception):
     pass
 
 
-class QiraController:
+class QiraController(Thread):
     def __init__(
         self,
         exe_path,
         window_title,
         address,
+        refresh_delay,
         trampoline_selector_position,
         trampoline_1_position,
         trampoline_2_position,
@@ -55,9 +62,14 @@ class QiraController:
         nousb_state_color,
         diagnosis_state_color,
     ):
+        super().__init__()
         self._exe_path = exe_path
         self._window_title = window_title
         self._address = address
+        self._refresh_delay = refresh_delay
+        self._is_watching = False
+        self._has_quit = False
+        self._callbacks = set()
 
         self._trampoline_selector_position = trampoline_selector_position
         self._trampoline_1_position = trampoline_1_position
@@ -77,6 +89,11 @@ class QiraController:
         self._nousb_state_color = nousb_state_color
         self._diagnosis_state_position = diagnosis_state_position
         self._diagnosis_state_color = diagnosis_state_color
+
+        self._logger = logger.getChild(repr(self))
+
+    def __repr__(self):
+        return f"QiraController@{hex(id(self))[-7:]}"
 
     def _detect_window(self):
         if self._window_title in gw.getAllTitles():
@@ -122,9 +139,54 @@ class QiraController:
         else:
             return State.UNDEFINED
 
+    def _call_callbacks(self, from_, to):
+        for callback in self._call_callbacks:
+            try:
+                callback(from_, to)
+            except:
+                self._logger.exception(f"An error occured when calling {callback}.")
+
+    @property
+    def has_quit(self):
+        return self._has_quit
+
     @property
     def state(self):
         return self._detect_state()
+
+    def add_callback(self, callback):
+        if callable(callback):
+            self._callbacks.add(callback)
+        else:
+            raise QiraControllerError("callback must be callable.")
+
+    def remove_callback(self, callback):
+        self._callbacks.discard(callback)
+
+    def clear_callbacks(self):
+        self._callbacks.clear()
+
+    def start_watching(self):
+        self.start()
+
+    def run(self):
+        self._logger.info("Watching Qira's state...")
+        self._is_watching = True
+
+        state = self._detect_state()
+        while self._is_watching:
+            previous_state, state = state, self._detect_state()
+            if previous_state != state:
+                self._logger.info(f"Qira changed state ({previous_state}->{state})")
+                self._call_callbacks(previous_state, state)
+
+            time.sleep(self._refresh_delay)
+
+        self._logger.warning("Stopped watching Qira's state.")
+        self._has_quit = True
+
+    def stop_watching(self):
+        self._is_watching = False
 
     def launch(self):
         if not (window := self._detect_window()):
@@ -188,7 +250,9 @@ class QiraController:
     def change_state(self):
         from_ = self._detect_state()
         self._press_space()
-        time.sleep(0.05)  # add delay because sometimes Qira is slower than detection
-        to = self._detect_state()
+        while (to := self._detect_state()) == from_:  # ensures that the change is detected
+            time.sleep(0.01)
+
+        self._call_callbacks(from_, to)
 
         return from_, to
