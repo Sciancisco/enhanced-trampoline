@@ -68,7 +68,7 @@ class QiraController(Thread):
         self._address = address
         self._refresh_delay = refresh_delay
         self._is_watching = False
-        self._has_quit = False
+        self._was_started = False
         self._callbacks = set()
 
         self._trampoline_selector_position = trampoline_selector_position
@@ -140,15 +140,15 @@ class QiraController(Thread):
             return State.UNDEFINED
 
     def _call_callbacks(self, from_, to):
-        for callback in self._call_callbacks:
+        for callback in self._callbacks:
             try:
                 callback(from_, to)
             except:
                 self._logger.exception(f"An error occured when calling {callback}.")
 
     @property
-    def has_quit(self):
-        return self._has_quit
+    def was_started(self):
+        return self._was_started
 
     @property
     def state(self):
@@ -172,6 +172,7 @@ class QiraController(Thread):
     def run(self):
         self._logger.info("Watching Qira's state...")
         self._is_watching = True
+        self._was_started = True
 
         state = self._detect_state()
         while self._is_watching:
@@ -179,11 +180,12 @@ class QiraController(Thread):
             if previous_state != state:
                 self._logger.info(f"Qira changed state ({previous_state}->{state})")
                 self._call_callbacks(previous_state, state)
+            else:
+                self._logger.debug("Qira did not change state.")
 
             time.sleep(self._refresh_delay)
 
         self._logger.warning("Stopped watching Qira's state.")
-        self._has_quit = True
 
     def stop_watching(self):
         self._is_watching = False

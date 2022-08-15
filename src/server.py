@@ -112,10 +112,10 @@ class Server:
 
     def _on_state_transition(self, from_, to):
         if to == State.REVIEW:
-            self._stop_recording()
+            self._stop_video_recording()
 
         if from_ == State.REVIEW:
-            self._stop_recording()
+            self._stop_video_recording()
             self._save_video()
 
         if to == State.START:
@@ -140,6 +140,7 @@ class Server:
         elif k == "media_play_pause":
             try:
                 from_, to = self._qira_controller.change_state()
+                self._logger.info(f"Qira changed state ({from_} -> {to})")
             except Exception as e:
                 self._logger.exception(str(e))
 
@@ -165,7 +166,9 @@ class Server:
             return None
 
     def start(self, use_cam=True):
-        if self._qira_controller is None or self._qira_controller.has_quit:
+        if self._qira_controller is None or (
+            self._qira_controller.was_started and not self._qira_controller.is_alive()
+        ):
             self._logger.info("Starting Qira watcher...")
             self._qira_controller = QiraController(**self._qira_controller_config)
 
@@ -206,7 +209,8 @@ class Server:
         if watcher := bool(self._qira_controller):
             self._logger.info("Stopping Qira watcher...")
             self._qira_controller.stop_watching()
-            self._qira_controller.join()
+            if not self._qira_controller.was_started:
+                self._qira_controller.join()
             self._qira_controller = None
 
         if listener or cam_recorder or watcher:
