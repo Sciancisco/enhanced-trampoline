@@ -175,8 +175,12 @@ class Server:
 
         if self._use_cam and self._camera_recorder is None or self._camera_recorder.has_quit:
             self._logger.info("Starting camera recorder...")
-            self._camera_recorder = CameraRecorder(**self._camera_recorder_config)
-            self._camera_recorder.start()
+            try:
+                self._camera_recorder = CameraRecorder(**self._camera_recorder_config)
+                self._camera_recorder.start()
+            except:
+                self._logger.exception("Error when starting camera recorder, disabling camera.")
+                self._use_cam = False
 
         if self._listener is None:
             self._logger.info("Starting keyboard listener...")
