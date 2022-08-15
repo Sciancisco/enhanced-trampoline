@@ -127,7 +127,7 @@ class Server:
             success = False
             try:
                 from_, to = self._qira_controller.change_state()  # TODO: store last transition to compare. Done?
-		success = (from_ != to)
+                success = from_ != to
 
                 self._logger.info(f"Qira changed state ({from_}->{to}) (success: {success})")
 
