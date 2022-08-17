@@ -144,6 +144,10 @@ class Server:
             except Exception as e:
                 self._logger.exception(str(e))
 
+        elif k == "space" or k == "1":
+            self._qira_controller.refresh_state()
+            self._logger.debug("Refreshed Qira's state.")
+
         elif k == "media_previous":
             if self._qira_controller.state == State.READY:
                 try:

@@ -1,5 +1,5 @@
 from enum import Enum
-from threading import Thread
+from threading import Event, Thread
 import time
 import subprocess
 
@@ -67,6 +67,7 @@ class QiraController(Thread):
         self._window_title = window_title
         self._address = address
         self._refresh_delay = refresh_delay
+        self._refresh_flag = Event()
         self._is_watching = False
         self._was_started = False
         self._callbacks = set()
@@ -121,7 +122,7 @@ class QiraController(Thread):
         self._position_window()
         window.activate()
 
-        time.sleep(0.005)
+        time.sleep(0.01)
         screenshot = pyautogui.screenshot()
 
         if screenshot.getpixel(self._ready_state_position) == self._ready_state_color:
@@ -187,9 +188,13 @@ class QiraController(Thread):
             else:
                 self._logger.debug("Qira did not change state.")
 
-            time.sleep(self._refresh_delay)
+            if self._refresh_flag.wait(self._refresh_delay):
+                self._refresh_flag.clear()
 
         self._logger.warning("Stopped watching Qira's state.")
+
+    def refresh_state(self):
+        self._refresh_flag.set()
 
     def stop_watching(self):
         self._is_watching = False
