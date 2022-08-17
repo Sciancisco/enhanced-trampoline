@@ -5,7 +5,7 @@ parser = argparse.ArgumentParser("Build the application.")
 parser.add_argument("--clean", action="store_true", help="build release package")
 args = parser.parse_args()
 
-options = ["gui.py", "--name", "Remote Qira", "--windowed", "--onefile"]
+options = ["src/gui.py", "--name", "Remote Qira", "--windowed", "--onefile"]
 
 if args.clean:
     options.append("--clean")
