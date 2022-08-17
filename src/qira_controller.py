@@ -176,7 +176,11 @@ class QiraController(Thread):
 
         state = self._detect_state()
         while self._is_watching:
-            previous_state, state = state, self._detect_state()
+            try:
+                previous_state, state = state, self._detect_state()
+            except gw.PyGetWindowException:
+                self._logger.debug("Error, operation success...")
+
             if previous_state != state:
                 self._logger.info(f"Qira changed state ({previous_state}->{state})")
                 self._call_callbacks(previous_state, state)
