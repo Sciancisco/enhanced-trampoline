@@ -2,15 +2,12 @@ import argparse
 import PyInstaller.__main__
 
 parser = argparse.ArgumentParser("Build the application.")
-parser.add_argument("--release", action="store_true", help="build release package")
+parser.add_argument("--clean", action="store_true", help="build release package")
 args = parser.parse_args()
 
-options = ["gui.py", "--clean", "--windowed"]
+options = ["gui.py", "--name", "Remote Qira", "--windowed", "--onefile"]
 
-if args.release:
-    options.append("--name 'Remote Qira'")
-    options.append("--onefile")
-else:
-    options.append("--name 'Remote Qira DEV'")
+if args.clean:
+    options.append("--clean")
 
 PyInstaller.__main__.run(options)
