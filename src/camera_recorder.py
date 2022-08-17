@@ -14,7 +14,7 @@ class CameraRecorder(Thread):
         super().__init__()
 
         self._cam = cv2.VideoCapture(camera_index)
-        self._fourcc = cv2.VideoWriter_fourcc(*fourcc)  # TODO: better use DIVX for windows?
+        self._fourcc = cv2.VideoWriter_fourcc(*fourcc)
         self._resolution = (
             int(self._cam.get(cv2.CAP_PROP_FRAME_HEIGHT)),
             int(self._cam.get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -102,8 +102,6 @@ class CameraRecorder(Thread):
     def quit(self):
         if self.is_alive():
             self._quit = True
-        else:
-            self._logger.warning("Tried to quit a non-running camera recorder.")
 
     def save_video(self, filename):
         if self._buffer_lock.locked() or self._is_recording:
