@@ -23,8 +23,7 @@ class Server:
     ):
         self._logger = logger.getChild(repr(self))
 
-        self._qira_controller_config = qira_controller_config
-        self._qira_controller = None
+        self._qira_controller = QiraController(**qira_controller_config)
 
         if use_cam:
             try:
@@ -176,12 +175,11 @@ class Server:
             return None
 
     def start(self):
-        if self._qira_controller is None or (
-            self._qira_controller.was_started and not self._qira_controller.is_alive()
-        ):
-            self._logger.info("Starting Qira watcher...")
-            self._qira_controller = QiraController(**self._qira_controller_config)
+        self._logger.info("Starting Qira watcher...")
+        try:
             self._qira_controller.start_watching()
+        except:
+            self._logger.exception("Error occured when starting Qira watcher.")
 
         self._qira_controller.launch()
         self._qira_controller.add_callback(self._on_state_transition)
@@ -211,12 +209,9 @@ class Server:
             self._logger.info("Stopping camera recorder...")
             self._camera_recorder.stop_recorder()
 
-        if watcher := bool(self._qira_controller):
+        if self._qira_controller.is_watching:
             self._logger.info("Stopping Qira watcher...")
             self._qira_controller.stop_watching()
-            if self._qira_controller.was_started:
-                self._qira_controller.join()
-            self._qira_controller = None
 
         if listener or cam_recorder or watcher:
             self._logger.info("Server stopped.")

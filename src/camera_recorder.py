@@ -26,6 +26,7 @@ class CameraRecorder:
 
         self._recorder_thread = None
         self._buffer_lock = Lock()
+        self._recorder_was_started = False
         self._stop_recorder = False
         self._is_recording = False
         self._start_recording = False
@@ -57,6 +58,8 @@ class CameraRecorder:
         return self._buffer[-1]
 
     def _recorder(self):
+        self._recorder_was_started = True
+
         while not self._stop_recorder:
             time.sleep(0.001)
 
@@ -100,11 +103,12 @@ class CameraRecorder:
             raise CameraRecorderError("Recorder already started.")
 
     def stop_recorder(self):
-        if self._recorder_thread is not None:
+        if self._recorder_thread is not None and self._recorder_was_started:
             self._stop_recording = True
             self._stop_recorder = True
             self._recorder_thread.join()
             self._recorder_thread = None
+            self._recorder_was_started = False
 
     def start_recording(self):
         if not self._is_recording:

@@ -37,7 +37,7 @@ class QiraControllerError(Exception):
     pass
 
 
-class QiraController(Thread):
+class QiraController:
     def __init__(
         self,
         exe_path,
@@ -62,14 +62,15 @@ class QiraController(Thread):
         nousb_state_color,
         diagnosis_state_color,
     ):
-        super().__init__()
         self._exe_path = exe_path
         self._window_title = window_title
         self._address = address
+
+        self._watcher_thread = None
         self._refresh_delay = refresh_delay
         self._refresh_flag = Event()
-        self._is_watching = False
-        self._was_started = False
+        self._watcher_is_watching = False
+        self._watcher_was_started = False
         self._callbacks = set()
 
         self._trampoline_selector_position = trampoline_selector_position
@@ -147,9 +148,32 @@ class QiraController(Thread):
             except:
                 self._logger.exception(f"An error occured when calling {callback}.")
 
+    def _watcher(self):
+        self._logger.info("Watching Qira's state...")
+        self._watcher_is_watching = True
+        self._watcher_was_started = True
+
+        state = self._detect_state()
+        while self._watcher_is_watching:
+            try:
+                previous_state, state = state, self._detect_state()
+            except gw.PyGetWindowException:
+                self._logger.debug("Error, operation success...")
+
+            if previous_state != state:
+                self._logger.info(f"Qira changed state ({previous_state}->{state})")
+                self._call_callbacks(previous_state, state)
+            else:
+                self._logger.debug("Qira did not change state.")
+
+            if self._refresh_flag.wait(self._refresh_delay):
+                self._refresh_flag.clear()
+
+        self._logger.warning("Stopped watching Qira's state.")
+
     @property
-    def was_started(self):
-        return self._was_started
+    def is_watching(self):
+        return self._watcher_is_watching
 
     @property
     def state(self):
@@ -168,36 +192,21 @@ class QiraController(Thread):
         self._callbacks.clear()
 
     def start_watching(self):
-        self.start()
-
-    def run(self):
-        self._logger.info("Watching Qira's state...")
-        self._is_watching = True
-        self._was_started = True
-
-        state = self._detect_state()
-        while self._is_watching:
-            try:
-                previous_state, state = state, self._detect_state()
-            except gw.PyGetWindowException:
-                self._logger.debug("Error, operation success...")
-
-            if previous_state != state:
-                self._logger.info(f"Qira changed state ({previous_state}->{state})")
-                self._call_callbacks(previous_state, state)
-            else:
-                self._logger.debug("Qira did not change state.")
-
-            if self._refresh_flag.wait(self._refresh_delay):
-                self._refresh_flag.clear()
-
-        self._logger.warning("Stopped watching Qira's state.")
+        if self._watcher_thread is None or not self._watcher_thread.is_alive():
+            self._watcher_thread = Thread(target=self._watcher)
+            self._watcher_thread.start()
+        else:
+            raise QiraControllerError("Watcher already started.")
 
     def refresh_state(self):
         self._refresh_flag.set()
 
     def stop_watching(self):
-        self._is_watching = False
+        if self._watcher_thread is not None and self._watcher_was_started:
+            self._watcher_is_watching = False
+            self._watcher_thread.join()
+            self._watcher_thread = None
+            self._watcher_was_started = False
 
     def launch(self):
         if not (window := self._detect_window()):
@@ -209,7 +218,7 @@ class QiraController(Thread):
                 time.sleep(1)
                 t += 1
 
-            if not t < timeout:
+            if t >= timeout:
                 raise QiraControllerError(f"Could not acquire Qira window with title '{self._window_title}'.")
         else:
             window.activate()
