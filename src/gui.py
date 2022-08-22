@@ -10,40 +10,37 @@ from server import Server
 
 
 root = Tk()
-server = Server(qira_controller_config=QiraConfig, camera_recorder_config=CameraConfig, **ServerConfig)
-
-live_feed_thread = None
-live_feed_on = Event()
 
 
-def restart():
-    server.stop()
-    server.start()
+use_cam = True
+server = None
 
 
-def live_feed_toggle():
-    global live_feed_thread
-    if live_feed_thread and live_feed_thread.is_alive():
-        btn_live_feed.config(text="Start live feed")
-        live_feed_on.clear()
+def start_server():
+    global server
+    if server is None:
+        server = Server(qira_controller_config=QiraConfig, camera_recorder_config=CameraConfig, use_cam=use_cam, **ServerConfig)
+        server.start()
+
+
+def stop_server():
+    global server
+    if server is not None:
+        server.stop()
+        server = None
+
+def use_cam_toggle():
+    global use_cam
+    if use_cam:
+        btn_use_cam.config(text="No")
+        use_cam = False
     else:
-        btn_live_feed.config(text="Stop live feed")
-        live_feed_on.set()
-        live_feed_thread = Thread(target=display_live_feed)
-        live_feed_thread.start()
-
-
-def display_live_feed():
-    while live_feed_on.is_set():
-        cv2.imshow("Live feed", server.last_recorded_frame)
-        time.sleep(1 / 30)
-
-    cv2.destroyAllWindows()
+        btn_use_cam.config(text="Yes")
+        use_cam = True
 
 
 def kill_all():
-    live_feed_on.clear()
-    server.stop()
+    stop_server()
     root.destroy()
 
 
@@ -51,14 +48,12 @@ frame = ttk.Frame(root, padding=10)
 frame.grid()
 
 ttk.Label(frame, text="Server").grid(column=0, row=0)
-ttk.Button(frame, text="Start", command=server.start).grid(column=1, row=0)
-ttk.Button(frame, text="Stop", command=server.stop).grid(column=2, row=0)
-ttk.Button(frame, text="Restart", command=restart).grid(column=3, row=0)
+ttk.Button(frame, text="Start", command=start_server).grid(column=1, row=0)
+ttk.Button(frame, text="Stop", command=stop_server).grid(column=2, row=0)
+ttk.Label(frame, text="Use camera").grid(column=0, row=1)
+btn_use_cam = ttk.Button(frame, text="Yes", command=use_cam_toggle)
+btn_use_cam.grid(column=1, row=1)
 
-ttk.Label(frame, text="Camera").grid(column=0, row=1)
-btn_live_feed = ttk.Button(frame, text="Start live feed", command=live_feed_toggle)
-btn_live_feed.grid(column=1, row=1)
-
-root.title("INS enhanced trampoline")
+root.title("Remote Qira")
 root.protocol("WM_DELETE_WINDOW", kill_all)
 root.mainloop()
