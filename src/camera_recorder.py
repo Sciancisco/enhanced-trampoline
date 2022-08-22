@@ -9,10 +9,12 @@ import _logging
 logger = _logging.get_console_logger(__name__)
 
 
-class CameraRecorder(Thread):
-    def __init__(self, camera_index, fourcc):
-        super().__init__()
+class CameraRecorderError(Exception):
+    pass
 
+
+class CameraRecorder:
+    def __init__(self, camera_index, fourcc):
         self._cam = cv2.VideoCapture(camera_index)
         self._fourcc = cv2.VideoWriter_fourcc(*fourcc)
         self._resolution = (
@@ -22,13 +24,14 @@ class CameraRecorder(Thread):
         self._fps = None
         self._buffer = deque()
 
-        self._quit = False
+        self._recorder_thread = None
+        self._buffer_lock = Lock()
+        self._stop_recorder = False
+        self._is_recording = False
         self._start_recording = False
         self._stop_recording = False
-        self._is_recording = False
-        self._buffer_lock = Lock()
 
-        self._logger = logger.getChild(repr(self))
+        # self._logger = logger.getChild(repr(self))
 
     def __repr__(self):
         return f"CameraRecorder@{hex(id(self))[-7:]}"
@@ -38,21 +41,23 @@ class CameraRecorder(Thread):
         self._cam.release()
 
     @property
+    def is_recorder_started(self):
+        return self._recorder_thread is not None and self._recorder_thread.is_alive()
+
+    @property
     def is_recording(self):
         return self._is_recording
 
     @property
-    def has_quit(self):
-        return self._quit
+    def has_stop_recorder(self):
+        return self._stop_recorder
 
     @property
     def last_frame(self):
         return self._buffer[-1]
 
-    def run(self):
-        self._logger.info("Camera recorder running...")
-
-        while not self._quit:
+    def _recorder(self):
+        while not self._stop_recorder:
             time.sleep(0.001)
 
             if self._start_recording and self._buffer_lock.acquire():
@@ -67,9 +72,7 @@ class CameraRecorder(Thread):
                 nb_frames = 0
                 start = time.time()
 
-                self._logger.info("Recording...")
-
-                while not self._stop_recording and not self._quit and self._cam.isOpened():
+                while not self._stop_recording and not self._stop_recorder and self._cam.isOpened():
                     ret, frame = self._cam.read()
                     if ret:
                         # camera is sideways
@@ -84,29 +87,37 @@ class CameraRecorder(Thread):
                 self._buffer_lock.release()
 
                 self._is_recording = False
-                self._logger.info("Stopped recording.")
 
         self._is_recording = False
         self._cam.release()
-        self._logger.warning("Camera recorder quit.")
+
+    def start_recorder(self):
+        if self._recorder_thread is None or not self._recorder_thread.is_alive():
+            self._stop_recorder = False
+            self._recorder_thread = Thread(target=self._recorder)
+            self._recorder_thread.start()
+        else:
+            raise CameraRecorderError("Recorder already started.")
+
+    def stop_recorder(self):
+        if self._recorder_thread is not None:
+            self._stop_recording = True
+            self._stop_recorder = True
+            self._recorder_thread.join()
+            self._recorder_thread = None
 
     def start_recording(self):
         if not self._is_recording:
             self._start_recording = True
         else:
-            self._logger.warning("Already recording, won't restart.")
+            raise CameraRecorderError("Already recording.")
 
     def stop_recording(self):
         self._stop_recording = True
 
-    def quit(self):
-        if self.is_alive():
-            self._quit = True
-
     def save_video(self, filename):
         if self._buffer_lock.locked() or self._is_recording:
             self._stop_recording = True
-            self._logger.warning("Stopping recording before saving.")
 
         if self._buffer:
             self._buffer_lock.acquire()
@@ -118,10 +129,8 @@ class CameraRecorder(Thread):
                 for frame in self._buffer:
                     writer.write(frame)
 
-                self._logger.info(f"Saved {len(self._buffer)} frames to '{filename}'")
-
             finally:
                 writer.release()
                 self._buffer_lock.release()
         else:
-            self._logger.warning("Nothing to save.")
+            raise CameraRecorderError("Nothing to save.")

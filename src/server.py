@@ -21,12 +21,19 @@ class Server:
         save_video_directory,
         qira_data_directory,
     ):
+        self._logger = logger.getChild(repr(self))
+
         self._qira_controller_config = qira_controller_config
         self._qira_controller = None
 
-        self._camera_recorder_config = camera_recorder_config
-        self._camera_recorder = None
-        self._use_cam = True
+        if use_cam:
+            try:
+                self._camera_recorder = CameraRecorder(**camera_recorder_config)
+            except:
+                self._camera_recorder = None
+                self._logger.exception("Error when initializing camera recorder. Camera disabled.")
+        else:
+            self._camera_recorder = None
 
         self._filename_spec = filename_spec
         self._video_container = video_container
@@ -40,8 +47,6 @@ class Server:
         self._timestamp = ""
         self._firstname = ""
         self._lastname = ""
-
-        self._logger = logger.getChild(repr(self))
 
     def __repr__(self):
         return f"Server@{hex(id(self))[-7:]}"
@@ -63,10 +68,10 @@ class Server:
             return False
 
     def _start_video_recording(self):
-        if not self._use_cam:
+        if self._camera_recorder is None:
             return
 
-        if self._camera_recorder and self._camera_recorder.is_alive():
+        if self._camera_recorder.is_recorder_started:
             if self._camera_recorder.is_recording:
                 # if Qira's state changes and the server never sees the transition (REVIEW, READY)
                 self._camera_recorder.stop_recording()
@@ -86,18 +91,17 @@ class Server:
             self._use_cam = False
 
     def _stop_video_recording(self):
-        if not self._use_cam:
+        if self._camera_recorder is None:
             return
 
-        if self._camera_recorder and self._camera_recorder.is_alive():
+        if self._camera_recorder.is_recorder_started():
             self._camera_recorder.stop_recording()
             self._logger.info("Stopped video recording.")
         else:
-            self._logger.critical("Camera recorder is not alive, disabling use of camera.")
-            self._use_cam = False
+            self._logger.error("Camera recorder is not alive.")
 
     def _save_video(self):
-        if not self._use_cam:
+        if self._camera_recorder is None:
             return
 
         filename = self._filename_spec.format(
@@ -106,9 +110,11 @@ class Server:
             timestamp=self._timestamp,
         )
         full_path = f"{self._save_video_directory}/{filename}.{self._video_container}"
-        self._camera_recorder.save_video(full_path)
-
-        self._logger.info(f"Saved video to '{full_path}'.")
+        try:
+            self._camera_recorder.save_video(full_path)
+            self._logger.info(f"Saved video to '{full_path}'.")
+        except:
+            self._logger.exception("Error occured when saving video.")
 
     def _on_state_transition(self, from_, to):
         if to == State.REVIEW:
@@ -169,7 +175,7 @@ class Server:
         else:
             return None
 
-    def start(self, use_cam=True):
+    def start(self):
         if self._qira_controller is None or (
             self._qira_controller.was_started and not self._qira_controller.is_alive()
         ):
@@ -180,16 +186,12 @@ class Server:
         self._qira_controller.launch()
         self._qira_controller.add_callback(self._on_state_transition)
 
-        self._use_cam = use_cam  # set for real here
-
-        if self._use_cam and self._camera_recorder is None or self._camera_recorder.has_quit:
+        if self._camera_recorder:
             self._logger.info("Starting camera recorder...")
             try:
-                self._camera_recorder = CameraRecorder(**self._camera_recorder_config)
-                self._camera_recorder.start()
+                self._camera_recorder.start_recorder()
             except:
-                self._logger.exception("Error when starting camera recorder, disabling camera.")
-                self._use_cam = False
+                self._logger.exception("Error when starting camera recorder.")
 
         if self._listener is None:
             self._logger.info("Starting keyboard listener...")
@@ -207,9 +209,7 @@ class Server:
 
         if cam_recorder := bool(self._camera_recorder):
             self._logger.info("Stopping camera recorder...")
-            self._camera_recorder.quit()
-            self._camera_recorder.join()
-            self._camera_recorder = None
+            self._camera_recorder.stop_recorder()
 
         if watcher := bool(self._qira_controller):
             self._logger.info("Stopping Qira watcher...")
