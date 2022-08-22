@@ -1,6 +1,6 @@
 from threading import Event, Thread
 import time
-from tkinter import Tk, TopLevel, filedialog
+from tkinter import Tk, Toplevel, filedialog
 import tkinter.ttk as ttk
 
 import cv2
@@ -16,15 +16,17 @@ root = Tk()
 
 use_cam = True
 server = None
+athletes = {}
 
 
 def start_server():
     logger.info(f"Start server with camera set to '{use_cam}'.")
-    global server
+    global server, athletes
     if server is None:
         server = Server(
             qira_controller_config=QiraConfig, camera_recorder_config=CameraConfig, use_cam=use_cam, **ServerConfig
         )
+        server.set_athlete_map(athletes)
         server.start()
 
 
@@ -49,19 +51,27 @@ def use_cam_toggle():
 
 def load_athlete_csv():
     logger.info("Load athletes.")
-    global server
+
+    global server, athletes
     filename = filedialog.askopenfilename(
         initialdir="/", title="Select file", filetypes=[("CSV", "*.csv"), ("All TXT files", "*.txt")]
     )
+    if filename is None:
+        return
+
     try:
-        server.load_athlete_csv(filename)
+        athletes = Server.load_athlete_csv(filename)
+        if server is not None:
+            server.set_athlete_map(athletes)
+
         logger.info("Loaded athletes.")
     except Exception as e:
         logger.exception(f"Error occured when loading '{filename}'.")
-        popup = TopLevel(root)
-        popup.grid()
-        popup.title("Error!")
-        ttk.Label(popup, text=f"Error occured when loading '{filename}': {e}").grid(column=0, row=0)
+        popup = Toplevel(root)
+        frame = ttk.Frame(popup, padding=10)
+        frame.grid()
+        frame.title("Error!")
+        ttk.Label(frame, text=f"Error occured when loading '{filename}': {e}").grid(column=0, row=0)
 
 
 def kill_all():

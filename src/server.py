@@ -51,6 +51,33 @@ class Server:
     def __repr__(self):
         return f"Server@{hex(id(self))[-7:]}"
 
+    @staticmethod
+    def load_athlete_csv(filename):
+        with open(filename) as f:
+            content = f.readlines()
+
+        if len(content) < 1:
+            raise Exception("File is empty.")
+
+        striped_content = map(str.strip, content)
+        fields = next(striped_content)
+
+        if fields != "firstname,lastname":
+            raise Exception("Invalid fields. Must match 'firstname,lastname'.")
+
+        athletes = map(lambda a: a.split(","), striped_content)
+        number = map(str, range(2, len(content) + 1))
+        mapping = zip(number, athletes)
+
+        athlete_map = dict(mapping)
+
+        # validation
+        for i, athlete in enumerate(athlete_map.values()):
+            if len(athlete) != 2:
+                raise Exception(f"Athlete '{athlete}' invalid on line {i+1}. Must follow format 'firstname,lastname'.")
+
+        return athlete_map
+
     def _send_routine_meta(self):
         try:
             self._qira_controller.send_routine_meta(
@@ -220,26 +247,7 @@ class Server:
         else:
             self._logger.info("Already stopped.")
 
-    def load_athlete_csv(self, filename):
-        with open(filename) as f:
-            content = f.readlines()
-
-        if len(content) < 1:
-            raise Exception("File is empty.")
-
-        striped_content = map(str.strip, content)
-        fields = next(striped_content)
-
-        if fields != "firstname,lastname":
-            raise Exception("Invalid fields. Must match 'firstname,lastname'.")
-
-        athletes = map(lambda a: a.split(","), striped_content)
-        number = map(str, range(2, len(content) + 1))
-        mapping = zip(number, athletes)
-
-        self._athlete_map = dict(mapping)
-
-        # validation
-        for i, athlete in enumerate(self._athlete_map.values()):
-            if len(athlete) != 2:
-                raise Exception(f"Athlete '{athlete}' invalid on line {i+1}. Must follow format 'firstname,lastname'.")
+    def set_athlete_map(self, athlete_map):
+        if athlete_map is None:
+            athlete_map = {}
+        self._athlete_map = athlete_map
