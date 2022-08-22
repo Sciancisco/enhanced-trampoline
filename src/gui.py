@@ -54,7 +54,7 @@ def load_athlete_csv():
 
     global server, athletes
     filename = filedialog.askopenfilename(
-        initialdir="/", title="Select file", filetypes=[("CSV", "*.csv"), ("All TXT files", "*.txt")]
+        initialdir=".", title="Select file", filetypes=[("CSV", "*.csv"), ("All TXT files", "*.txt")]
     )
     if filename is None:
         return
