@@ -14,7 +14,7 @@ logger = get_console_logger(__name__)
 root = Tk()
 
 
-use_cam = True
+use_cam = False
 server = None
 athletes = {}
 
@@ -88,7 +88,7 @@ ttk.Button(frame, text="Start", command=start_server).grid(column=1, row=0)
 ttk.Button(frame, text="Stop", command=stop_server).grid(column=2, row=0)
 
 ttk.Label(frame, text="Use camera").grid(column=0, row=1)
-btn_use_cam = ttk.Button(frame, text="Yes", command=use_cam_toggle)
+btn_use_cam = ttk.Button(frame, text="No", command=use_cam_toggle)
 btn_use_cam.grid(column=1, row=1)
 
 ttk.Label(frame, text="Athletes").grid(column=0, row=2)
