@@ -20,6 +20,7 @@ class Server:
         save_data_directory,
         save_video_directory,
         qira_data_directory,
+        use_cam=True,
     ):
         self._logger = logger.getChild(repr(self))
 
@@ -86,8 +87,7 @@ class Server:
             self._camera_recorder.start_recording()
             self._logger.info("Started video recording...")
         else:
-            self._logger.critical("Camera recorder is not alive, disabling use of camera.")
-            self._use_cam = False
+            self._logger.warning("Camera recorder is not alive.")
 
     def _stop_video_recording(self):
         if self._camera_recorder is None:
@@ -97,7 +97,7 @@ class Server:
             self._camera_recorder.stop_recording()
             self._logger.info("Stopped video recording.")
         else:
-            self._logger.error("Camera recorder is not alive.")
+            self._logger.warning("Camera recorder is not alive.")
 
     def _save_video(self):
         if self._camera_recorder is None:
@@ -116,6 +116,8 @@ class Server:
             self._logger.exception("Error occured when saving video.")
 
     def _on_state_transition(self, from_, to):
+        self._logger.info(f"Qira changed state ({from_} -> {to})")
+
         if to == State.REVIEW:
             self._stop_video_recording()
 
@@ -151,7 +153,7 @@ class Server:
 
         elif k == "space" or k == "1":
             self._qira_controller.refresh_state()
-            self._logger.debug("Refreshed Qira's state.")
+            self._logger.info(f"Pressed {k}, refreshing Qira's state.")
 
         elif k == "media_previous":
             if self._qira_controller.state == State.READY:

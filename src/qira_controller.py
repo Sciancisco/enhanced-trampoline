@@ -92,7 +92,7 @@ class QiraController:
         self._diagnosis_state_position = diagnosis_state_position
         self._diagnosis_state_color = diagnosis_state_color
 
-        self._logger = logger.getChild(repr(self))
+        # self._logger = logger.getChild(repr(self))
 
     def __repr__(self):
         return f"QiraController@{hex(id(self))[-7:]}"
@@ -145,11 +145,10 @@ class QiraController:
         for callback in self._callbacks:
             try:
                 callback(from_, to)
-            except:
-                self._logger.exception(f"An error occured when calling {callback}.")
+            except Exception as e:
+                raise QiraControllerError(f"An error occured when calling {callback}: {e}")
 
     def _watcher(self):
-        self._logger.info("Watching Qira's state...")
         self._watcher_is_watching = True
         self._watcher_was_started = True
 
@@ -158,18 +157,13 @@ class QiraController:
             try:
                 previous_state, state = state, self._detect_state()
             except gw.PyGetWindowException:
-                self._logger.debug("Error, operation success...")
+                pass
 
             if previous_state != state:
-                self._logger.info(f"Qira changed state ({previous_state}->{state})")
                 self._call_callbacks(previous_state, state)
-            else:
-                self._logger.debug("Qira did not change state.")
 
             if self._refresh_flag.wait(self._refresh_delay):
                 self._refresh_flag.clear()
-
-        self._logger.warning("Stopped watching Qira's state.")
 
     @property
     def is_watching(self):
