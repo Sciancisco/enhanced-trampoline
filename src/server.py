@@ -93,7 +93,7 @@ class Server:
         if self._camera_recorder is None:
             return
 
-        if self._camera_recorder.is_recorder_started():
+        if self._camera_recorder.is_recorder_started:
             self._camera_recorder.stop_recording()
             self._logger.info("Stopped video recording.")
         else:

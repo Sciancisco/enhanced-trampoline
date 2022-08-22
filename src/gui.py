@@ -19,7 +19,9 @@ server = None
 def start_server():
     global server
     if server is None:
-        server = Server(qira_controller_config=QiraConfig, camera_recorder_config=CameraConfig, use_cam=use_cam, **ServerConfig)
+        server = Server(
+            qira_controller_config=QiraConfig, camera_recorder_config=CameraConfig, use_cam=use_cam, **ServerConfig
+        )
         server.start()
 
 
@@ -28,6 +30,7 @@ def stop_server():
     if server is not None:
         server.stop()
         server = None
+
 
 def use_cam_toggle():
     global use_cam
