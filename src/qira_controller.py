@@ -70,7 +70,6 @@ class QiraController:
         self._refresh_delay = refresh_delay
         self._refresh_flag = Event()
         self._watcher_is_watching = False
-        self._watcher_was_started = False
         self._callbacks = set()
 
         self._trampoline_selector_position = trampoline_selector_position
@@ -196,11 +195,10 @@ class QiraController:
         self._refresh_flag.set()
 
     def stop_watching(self):
-        if self._watcher_thread is not None and self._watcher_was_started:
-            self._watcher_is_watching = False
+        if self._watcher_thread is not None:  # there is a thread only if self.start_watching was called
+            self._watcher_is_watching = False  # stops the watcher
             self._watcher_thread.join()
             self._watcher_thread = None
-            self._watcher_was_started = False
 
     def launch(self):
         if not (window := self._detect_window()):

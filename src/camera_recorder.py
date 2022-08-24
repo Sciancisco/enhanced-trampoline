@@ -1,5 +1,6 @@
 from collections import deque, namedtuple
-from threading import Lock, Thread
+from copy import copy
+from threading import Thread
 import time
 
 import cv2
@@ -25,8 +26,6 @@ class CameraRecorder:
         self._buffer = deque()
 
         self._recorder_thread = None
-        self._buffer_lock = Lock()
-        self._recorder_was_started = False
         self._stop_recorder = False
         self._is_recording = False
         self._start_recording = False
@@ -42,24 +41,14 @@ class CameraRecorder:
         self._cam.release()
 
     @property
-    def is_recorder_started(self):
+    def is_recorder_running(self):
         return self._recorder_thread is not None and self._recorder_thread.is_alive()
 
     @property
     def is_recording(self):
         return self._is_recording
 
-    @property
-    def has_stop_recorder(self):
-        return self._stop_recorder
-
-    @property
-    def last_frame(self):
-        return self._buffer[-1]
-
     def _recorder(self):
-        self._recorder_was_started = True
-
         while not self._stop_recorder:
             time.sleep(0.001)
 
@@ -95,7 +84,7 @@ class CameraRecorder:
         self._cam.release()
 
     def start_recorder(self):
-        if self._recorder_thread is None or not self._recorder_thread.is_alive():
+        if not self.is_recorder_running:
             self._stop_recorder = False
             self._recorder_thread = Thread(target=self._recorder)
             self._recorder_thread.start()
@@ -103,12 +92,11 @@ class CameraRecorder:
             raise CameraRecorderError("Recorder already started.")
 
     def stop_recorder(self):
-        if self._recorder_thread is not None and self._recorder_was_started:
-            self._stop_recording = True
-            self._stop_recorder = True
+        if self._recorder_thread is not None:  # there is a thread only if self.start_recorder was called
+            self._stop_recording = True  # stops recording
+            self._stop_recorder = True  # stop the recorder
             self._recorder_thread.join()
             self._recorder_thread = None
-            self._recorder_was_started = False
 
     def start_recording(self):
         if not self._is_recording:
@@ -120,21 +108,18 @@ class CameraRecorder:
         self._stop_recording = True
 
     def save_video(self, filename):
-        if self._buffer_lock.locked() or self._is_recording:
-            self._stop_recording = True
-
         if self._buffer:
-            self._buffer_lock.acquire()
+            buffer = copy(self._buffer)  # snapshot of the buffer, makes it thread safe
             try:
                 # of great help to figure out VideoWriter's quirks
                 # https://github.com/ContinuumIO/anaconda-issues/issues/223
                 writer = cv2.VideoWriter(filename, self._fourcc, self._fps, self._resolution)
 
-                for frame in self._buffer:
+                for frame in buffer:
                     writer.write(frame)
 
             finally:
                 writer.release()
-                self._buffer_lock.release()
+                buffer.release()
         else:
             raise CameraRecorderError("Nothing to save.")

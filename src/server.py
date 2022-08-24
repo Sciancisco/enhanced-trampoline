@@ -98,7 +98,7 @@ class Server:
         if self._camera_recorder is None:
             return
 
-        if self._camera_recorder.is_recorder_started:
+        if self._camera_recorder.is_recorder_running:
             if self._camera_recorder.is_recording:
                 # if Qira's state changes and the server never sees the transition (REVIEW, READY)
                 self._camera_recorder.stop_recording()
@@ -120,7 +120,7 @@ class Server:
         if self._camera_recorder is None:
             return
 
-        if self._camera_recorder.is_recorder_started:
+        if self._camera_recorder.is_recorder_running:
             self._camera_recorder.stop_recording()
             self._logger.info("Stopped video recording.")
         else:
@@ -195,13 +195,6 @@ class Server:
                     self._qira_controller.select_trampoline(Trampoline.TWO)
                 except Exception as e:
                     print(e)
-
-    @property
-    def last_recorded_frame(self):
-        if self._camera_recorder:
-            return self._camera_recorder.last_frame
-        else:
-            return None
 
     def start(self):
         self._logger.info("Starting Qira watcher...")
