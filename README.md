@@ -8,7 +8,7 @@ Qira and extract relevant information from the generated ".dat" files.
 
 First download or clone this repository.
 
-### Configuration
+### Configure Remote Qira
 
 You should first configure properly the program in `src/config.py`
 beforehand as this config was used for testing on the dev computer.
@@ -29,12 +29,23 @@ python -i -c 'import pyautogui'
 ```
 and use `pyautogui.position()` directly to get the position of the mouse pointer.
 
-While you are configuring stuff, you should also configure Qira. In Qira, press
-the menu "Config" -> "Autosave config". Under "File system" tick
+### Configure Qira
+
+While you are configuring stuff, you should also configure Qira.
+
+#### Configure the filename template
+
+In Qira, press the menu "Config" -> "Autosave config". Under "File system" tick
 "Enable autosave to file". Then, select the path you configured for
 `ServerConfig["qira_data_directory"]`. Finally, make sure that
 "Filename template" matches the one configured in `ServerConfig["filename_spec"]`.
 Press "Ok" and you are done.
+
+#### Enable the network server
+
+In Qira, press the menu "Config" -> "Network". Under "Server settings" tick
+"Enable server" and press "Ok". This is how Remote Qira sends meta information
+about the routine.
 
 ### Building
 
@@ -55,4 +66,3 @@ The executable name "Remote Qira" should be in the `dist` directory.
 Copy-paste it wherever you like. Double click to launch, like any other program.
 
 Have fun!
-
