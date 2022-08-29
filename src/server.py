@@ -1,3 +1,4 @@
+from threadding import Thread
 import time
 
 from pynput import keyboard
@@ -5,7 +6,7 @@ from pynput import keyboard
 import _logging
 from camera_recorder import CameraRecorder
 from qira_controller import QiraController, Trampoline, State
-
+from save_data import SaveData
 
 logger = _logging.get_console_logger(__name__)
 
@@ -15,11 +16,7 @@ class Server:
         self,
         qira_controller_config,
         camera_recorder_config,
-        filename_spec,
-        video_container,
-        save_data_directory,
-        save_video_directory,
-        qira_data_directory,
+        save_data_config,
         use_cam=True,
     ):
         self._logger = logger.getChild(repr(self))
@@ -35,11 +32,7 @@ class Server:
         else:
             self._camera_recorder = None
 
-        self._filename_spec = filename_spec
-        self._video_container = video_container
-        self._save_data_directory = save_data_directory
-        self._save_video_directory = save_video_directory
-        self._qira_data_directory = qira_data_directory
+        self._save_data = SaveData(**save_data_config)
 
         self._athlete_map = {}
         self._listener = None
@@ -102,14 +95,17 @@ class Server:
             if self._camera_recorder.is_recording:
                 # if Qira's state changes and the server never sees the transition (REVIEW, READY)
                 self._camera_recorder.stop_recording()
-                filename = self._filename_spec.format(
+                filename = self._save_data.gen_recovered_filename(
                     firstname=self._firstname,
                     lastname=self._lastname,
                     timestamp=self._timestamp,
                 )
-                full_path = f"{self._save_video_directory}/{filename}_recovered.{self._video_container}"
-                self._camera_recorder.save_video(full_path)
-                self._logger.warning(f"Camera was still recording, saved to '{full_path}'")
+
+                def save():
+                    self._camera_recorder.save_video(filename)
+                    self._logger.warning(f"Camera was still recording, saved to '{filename}'.")
+
+                Thread(target=save).start()  # don't block while saving potentially large video
 
             self._camera_recorder.start_recording()
             self._logger.info("Started video recording...")
@@ -130,15 +126,14 @@ class Server:
         if self._camera_recorder is None:
             return
 
-        filename = self._filename_spec.format(
+        filename = self._save_data.gen_video_filename(
             firstname=self._firstname,
             lastname=self._lastname,
             timestamp=self._timestamp,
         )
-        full_path = f"{self._save_video_directory}/{filename}.{self._video_container}"
         try:
-            self._camera_recorder.save_video(full_path)
-            self._logger.info(f"Saved video to '{full_path}'.")
+            self._camera_recorder.save_video(filename)
+            self._logger.info(f"Saved video to '{filename}'.")
         except:
             self._logger.exception("Error occured when saving video.")
 
@@ -150,12 +145,23 @@ class Server:
 
         if from_ == State.REVIEW:
             self._stop_video_recording()
-            self._save_video()
+
+            def save():
+                firstname = self._firstname
+                lastname = self._lastname
+                timestamp = self._timestamp
+                self._save_video()
+                self._save_data.dat_to_json(
+                    firstname=firstname,
+                    lastname=lastname,
+                    timestamp=timestamp,
+                )
+            Thread(target=save).start()  # don't block main thread
 
         if to == State.START:
             self._timestamp = time.strftime("%Y%m%d_%H%M%S")
             self._start_video_recording()
-            self._send_routine_meta()
+            Thread(self._send_routine_meta).start()  # same
 
     def _on_remote_press(self, key):  # also work for keyboard presses since the remote is basically a keyboard
         try:

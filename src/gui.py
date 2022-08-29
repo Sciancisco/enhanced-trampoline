@@ -6,7 +6,7 @@ import tkinter.ttk as ttk
 import cv2
 
 from _logging import get_console_logger
-from config import CameraConfig, QiraConfig, ServerConfig
+from config import CameraConfig, QiraConfig, SaveDataConfig
 from server import Server
 
 
@@ -24,7 +24,10 @@ def start_server():
     global server, athletes
     if server is None:
         server = Server(
-            qira_controller_config=QiraConfig, camera_recorder_config=CameraConfig, use_cam=use_cam, **ServerConfig
+            qira_controller_config=QiraConfig,
+            camera_recorder_config=CameraConfig,
+            save_data_config=SaveDataConfig,
+            use_cam=use_cam,
         )
         server.set_athlete_map(athletes)
         server.start()

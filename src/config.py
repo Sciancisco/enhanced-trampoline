@@ -4,7 +4,7 @@ LoggingConfig = dict(global_level=DEBUG, log_file=None)
 
 QiraConfig = dict(
     address="127.0.0.1:8080",
-    exe_path="C:/Program Files/Qira/Qira",
+    exe_path=r"C:\Program Files\Qira\Qira",
     window_title="Qira v2.1.0",
     refresh_delay=5,
     trampoline_selector_position=(230, 200),  # positions on a 1600x900 TN panel
@@ -33,10 +33,9 @@ CameraConfig = dict(
 )
 
 
-ServerConfig = dict(
-    filename_spec="{firstname}_{lastname}_{timestamp}",
+SaveDataConfig = dict(
+    qira_data_directory=r"C:\Users\Test\enhanced-trampoline\local",
+    save_data_directory=r"C:\Users\Test\enhanced-trampoline\local\save",
     video_container="avi",
-    save_data_directory="C:/Users/Test/enhanced-trampoline/local/save",
-    save_video_directory="C:/Users/Test/enhanced-trampoline/local/save/video",
-    qira_data_directory="C:/Users/Test/enhanced-trampoline/local",
+    filename_format="{firstname}_{lastname}_{timestamp}",
 )
