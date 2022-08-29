@@ -66,3 +66,24 @@ The executable name "Remote Qira" should be in the `dist` directory.
 Copy-paste it wherever you like. Double click to launch, like any other program.
 
 Have fun!
+
+## Save data specification
+
+During it's operation, this program reads the ".dat" files (in the
+`qira_data_directory`) produced by Qira, extracts the relevant routine data, and
+stores said data as a ".json" (in `save_data_directory`).
+
+This `save_data_directory` must have this structure:
+```
++-- save_data_directory/
+  +-- videos/
+  | +-- *.avi
+  +-- recovered/
+  | +-- *.avi
+  +-- *.json
+```
+Each ".json" should contain a reference to the correct video of the routine and
+a reading program is to assume that the video is in the `videos/` directory. The
+`recovered/` directory is for when the program missed the transition telling it
+to stop recording and save the video. This means it was still recording when it
+was asked to start recording.
