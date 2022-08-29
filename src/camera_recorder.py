@@ -120,6 +120,5 @@ class CameraRecorder:
 
             finally:
                 writer.release()
-                buffer.release()
         else:
             raise CameraRecorderError("Nothing to save.")
