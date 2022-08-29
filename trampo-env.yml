@@ -1,4 +1,4 @@
-name: trampo-dev
+name: trampoline
 channels:
   - conda-forge
   - defaults
