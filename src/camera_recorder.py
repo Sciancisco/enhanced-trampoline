@@ -46,7 +46,7 @@ class CameraRecorder:
         while not self._stop_recorder:
             time.sleep(0.001)
 
-            if self._start_recording and self._buffer_lock.acquire():
+            if self._start_recording:
                 self._start_recording = False
                 self._stop_recording = False
                 self._is_recording = True
@@ -70,7 +70,6 @@ class CameraRecorder:
 
                 stop = time.time()
                 self._fps = nb_frames / (stop - start)
-                self._buffer_lock.release()
 
                 self._is_recording = False
 

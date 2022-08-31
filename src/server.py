@@ -31,6 +31,7 @@ class Server:
                 self._logger.exception("Error when initializing camera recorder. Camera disabled.")
         else:
             self._camera_recorder = None
+            self._logger.info("Server initialized without camera recorder.")
 
         self._save_data = SaveData(**save_data_config)
 
@@ -210,12 +211,14 @@ class Server:
         self._qira_controller.launch()
         self._qira_controller.add_callback(self._on_state_transition)
 
-        if self._camera_recorder:
+        if self._camera_recorder is not None:
             self._logger.info("Starting camera recorder...")
             try:
                 self._camera_recorder.start_recorder()
             except:
                 self._logger.exception("Error when starting camera recorder.")
+        else:
+            self._logger.info("No camera recorder, cannot start it.")
 
         if self._listener is None:
             self._logger.info("Starting keyboard listener...")
