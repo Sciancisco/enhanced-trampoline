@@ -47,7 +47,7 @@ class _States(Enum):
             raise CameraRecorderError(f"Cannot transition from {self} to {state}.")
 
 
-_State.init_automaton()
+_States.init_automaton()
 
 
 class CameraRecorder:
@@ -126,7 +126,7 @@ class CameraRecorder:
         self._state = self._state.to(_States.RECORDING)
 
     def stop_recording(self):
-        self._state = self._state.to(_State.IDLE)
+        self._state = self._state.to(_States.IDLE)
 
     def save_video(self, filename):
         if self._buffer:
