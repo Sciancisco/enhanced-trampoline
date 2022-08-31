@@ -27,6 +27,7 @@ class _States(Enum):
 
         cls.IDLE._add_next(cls.NOT_RUNNING)
         cls.IDLE._add_next(cls.RECORDING)
+        cls.IDLE._add_next(cls.IDLE)
 
         cls.RECORDING._add_next(cls.IDLE)
         cls.RECORDING._add_next(cls.NOT_RUNNING)
