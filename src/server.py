@@ -82,10 +82,8 @@ class Server:
                 "Sent routine meta: "
                 f"firstname='{self._firstname}' lastname='{self._lastname}' timestamp='{self._timestamp}'."
             )
-            return True
         except Exception as e:
             self._logger.exception(str(e))
-            return False
 
     def _start_video_recording(self):
         if self._camera_recorder is None:
@@ -161,7 +159,7 @@ class Server:
         if to == State.START:
             self._timestamp = time.strftime("%Y%m%d_%H%M%S")
             self._start_video_recording()
-            Thread(self._send_routine_meta).start()  # same
+            Thread(target=self._send_routine_meta).start()  # same
 
     def _on_remote_press(self, key):  # also work for keyboard presses since the remote is basically a keyboard
         try:
@@ -175,7 +173,7 @@ class Server:
             and self._qira_controller.state in {State.READY, State.START, State.ROUTINE, State.REVIEW}
         ):
             self._firstname, self._lastname = self._athlete_map[k]
-            self._send_routine_meta()
+            Thread(target=self._send_routine_meta).start()  # TODO: these threads should really be asyncio
 
         elif k == "media_play_pause":
             try:
