@@ -147,15 +147,18 @@ class Server:
         if from_ == State.REVIEW:
             self._stop_video_recording()
 
-            firstname = self._firstname
-            lastname = self._lastname
-            timestamp = self._timestamp
-            self._save_video()
-            self._save_data.dat_to_json(  # here I extract the .dat and write json
-                firstname=firstname,
-                lastname=lastname,
-                timestamp=timestamp,
-            )
+            def save():
+                firstname = self._firstname
+                lastname = self._lastname
+                timestamp = self._timestamp
+                self._save_video()
+                self._save_data.dat_to_json(  # here I extract the .dat and write json
+                    firstname=firstname,
+                    lastname=lastname,
+                    timestamp=timestamp,
+                )
+
+            Thread(target=save).start()
 
         if to == State.START:
             self._start_video_recording()
