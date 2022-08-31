@@ -1,4 +1,4 @@
-from threadding import Thread
+from threading import Thread
 import time
 
 from pynput import keyboard
@@ -151,7 +151,7 @@ class Server:
                 lastname = self._lastname
                 timestamp = self._timestamp
                 self._save_video()
-                self._save_data.dat_to_json(
+                self._save_data.dat_to_json(  # here I extract the .dat and write json
                     firstname=firstname,
                     lastname=lastname,
                     timestamp=timestamp,
