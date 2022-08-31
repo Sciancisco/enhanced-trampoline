@@ -7,11 +7,6 @@ import pyautogui
 import pygetwindow as gw
 import requests
 
-import _logging
-
-
-logger = _logging.get_console_logger(__name__)
-
 
 class State(Enum):
 
@@ -90,8 +85,6 @@ class QiraController:
         self._nousb_state_color = nousb_state_color
         self._diagnosis_state_position = diagnosis_state_position
         self._diagnosis_state_color = diagnosis_state_color
-
-        # self._logger = logger.getChild(repr(self))
 
     def __repr__(self):
         return f"QiraController@{hex(id(self))[-7:]}"

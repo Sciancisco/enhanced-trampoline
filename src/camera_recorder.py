@@ -5,10 +5,6 @@ import time
 
 import cv2
 
-import _logging
-
-logger = _logging.get_console_logger(__name__)
-
 
 class CameraRecorderError(Exception):
     pass
@@ -30,8 +26,6 @@ class CameraRecorder:
         self._is_recording = False
         self._start_recording = False
         self._stop_recording = False
-
-        # self._logger = logger.getChild(repr(self))
 
     def __repr__(self):
         return f"CameraRecorder@{hex(id(self))[-7:]}"
