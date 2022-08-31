@@ -1,4 +1,4 @@
-from threading import Thread
+from threading import Thread  # NOTE: this code assumes that the GIL exists.
 import time
 
 from pynput import keyboard
@@ -157,6 +157,7 @@ class Server:
                     lastname=lastname,
                     timestamp=timestamp,
                 )
+
             Thread(target=save).start()  # don't block main thread
 
         if to == State.START:

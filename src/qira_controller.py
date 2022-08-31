@@ -187,7 +187,9 @@ class QiraController:
         self._refresh_flag.set()
 
     def stop_watching(self):
-        if self._watcher_thread is not None and self._watcher_thread.is_alive():  # there is a thread only if self.start_watching was called
+        if (
+            self._watcher_thread is not None and self._watcher_thread.is_alive()
+        ):  # there is a thread only if self.start_watching was called
             self._watcher_is_watching = False  # stops the watcher
             self._watcher_thread.join()
             self._watcher_thread = None
