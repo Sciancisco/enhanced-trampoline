@@ -141,6 +141,8 @@ class Server:
 
         if to == State.REVIEW:
             self._stop_video_recording()
+            self._timestamp = time.strftime("%Y%m%d_%H%M%S")
+            Thread(target=self._send_routine_meta).start()  # same
 
         if from_ == State.REVIEW:
             self._stop_video_recording()
@@ -158,9 +160,7 @@ class Server:
             Thread(target=save).start()  # don't block main thread
 
         if to == State.START:
-            self._timestamp = time.strftime("%Y%m%d_%H%M%S")
             self._start_video_recording()
-            Thread(target=self._send_routine_meta).start()  # same
 
     def _on_remote_press(self, key):  # also work for keyboard presses since the remote is basically a keyboard
         try:
