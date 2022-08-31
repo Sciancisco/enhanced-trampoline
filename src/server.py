@@ -181,7 +181,7 @@ class Server:
             except Exception as e:
                 self._logger.exception(str(e))
 
-        elif k == "space" or k == "1":
+        elif k == "space":
             self._qira_controller.refresh_state()
             self._logger.info(f"Pressed {k}, refreshing Qira's state.")
 

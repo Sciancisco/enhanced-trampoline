@@ -101,12 +101,12 @@ class QiraController:
 
         window.maximize()
 
-    def _press_space(self):
+    def _press_1(self):
         if not (window := self._detect_window()):
             raise QiraControllerError(f"No Qira window found with title '{self._window_title}'.")
 
         window.activate()
-        pyautogui.press(" ")
+        pyautogui.press("1")
 
     def _detect_state(self):
         if not (window := self._detect_window()):
@@ -258,7 +258,7 @@ class QiraController:
 
     def change_state(self):
         from_ = self._detect_state()
-        self._press_space()
+        self._press_1()
         while (to := self._detect_state()) == from_:  # ensures that the change is detected
             time.sleep(0.01)
 
