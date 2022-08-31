@@ -13,9 +13,9 @@ class CameraRecorderError(Exception):
 
 class _States(Enum):
 
-    NOT_RUNNING = ()
-    IDLE = ()
-    RECORDING = ()
+    NOT_RUNNING = "not_running"
+    IDLE = "idle"
+    RECORDING = "recording"
 
     @classmethod
     def init_automaton(cls):
@@ -31,7 +31,8 @@ class _States(Enum):
         cls.RECORDING._add_next(cls.IDLE)
         cls.RECORDING._add_next(cls.NOT_RUNNING)
 
-    def __init__(self):
+    def __init__(self, name):
+        self._name = name
         self._nexts = set()
 
     def _add_next(self, state):
