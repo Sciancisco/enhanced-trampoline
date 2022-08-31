@@ -39,7 +39,7 @@ class SaveData:
         self._save_recovered_directory = save_recovered_directory
 
         self._filename_format = filename_format
-        self._format_keywords = set(map(lambda t: t[1], Formatter.parse(filename_format)))
+        self._format_keywords = set(map(lambda t: t[1], Formatter().parse(filename_format)))
         self._video_container = video_container
 
     def _valid_kwargs(self, kwargs):
