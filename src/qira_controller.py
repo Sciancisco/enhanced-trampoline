@@ -1,5 +1,5 @@
 from enum import Enum
-from threading import Event, Thread
+from threading import Event, Thread  # NOTE: this code assumes that the GIL exists.
 import time
 import subprocess
 
@@ -142,7 +142,6 @@ class QiraController:
 
     def _watcher(self):
         self._watcher_is_watching = True
-        self._watcher_was_started = True
 
         state = self._detect_state()
         while self._watcher_is_watching:
@@ -188,9 +187,12 @@ class QiraController:
         self._refresh_flag.set()
 
     def stop_watching(self):
-        if self._watcher_thread is not None:  # there is a thread only if self.start_watching was called
+        if self._watcher_thread is not None and self._watcher_thread.is_alive():  # there is a thread only if self.start_watching was called
             self._watcher_is_watching = False  # stops the watcher
             self._watcher_thread.join()
+            self._watcher_thread = None
+        else:
+            self._watcher_is_watching = False
             self._watcher_thread = None
 
     def launch(self):
