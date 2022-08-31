@@ -20,7 +20,7 @@ Mainly, you should make sure that in
    * all the "`position`s" point what they are supposed to
 * CameraConfig:
    * increment `camera_index` if you are having trouble with the camera
-* ServerConfig:
+* SaveDataConfig:
    * all the "`directory`s" point the the correct locations and exists
 
 To find the various positions, you can run
@@ -37,9 +37,9 @@ While you are configuring stuff, you should also configure Qira.
 
 In Qira, press the menu "Config" -> "Autosave config". Under "File system" tick
 "Enable autosave to file". Then, select the path you configured for
-`ServerConfig["qira_data_directory"]`. Finally, make sure that
-"Filename template" matches the one configured in `ServerConfig["filename_spec"]`.
-Press "Ok" and you are done.
+`SaveDataConfig["qira_data_directory"]`. Finally, make sure that
+"Filename template" matches the one configured in
+`SaveDataConfig["filename_spec"]`. Press "Ok" and you are done.
 
 #### Enable the network server
 
