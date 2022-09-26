@@ -50,12 +50,16 @@ about the routine.
 ### Building
 
 To run or build this program, it is recommended to use Anaconda (or miniconda).
-The specifications for the environment are provided in `trampo-env.yml`.
+The specifications for the environment are provided in `trampoline.yml`.
 To create the environment, run
 ```
-conda env create trampo-env.yml
+conda env create -f trampoline.yml
 ```
 in the shell of choice (`cd`ed in this directory).
+To activate the environment, run
+```
+conda activate trampoline
+```
 
 Once the environment created and activated, you can build the executable by
 running:
@@ -76,14 +80,14 @@ stores said data as a ".json" (in `save_data_directory`).
 This `save_data_directory` must have this structure:
 ```
 +-- save_data_directory/
-  +-- videos/
+  +-- video/
   | +-- *.avi
   +-- recovered/
   | +-- *.avi
   +-- *.json
 ```
 Each ".json" should contain a reference to the correct video of the routine and
-a reading program is to assume that the video is in the `videos/` directory. The
+a reading program is to assume that the video is in the `video/` directory. The
 `recovered/` directory is for when the program missed the transition telling it
 to stop recording and save the video. This means it was still recording when it
 was asked to start recording.
