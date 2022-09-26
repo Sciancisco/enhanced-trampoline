@@ -152,6 +152,7 @@ class Server:
                 lastname = self._lastname
                 timestamp = self._timestamp
                 self._save_video()
+                self._logger.info(f"Parsing for firstname={firstname}, lastname={lastname}, timestamp={timestamp}")
                 self._save_data.dat_to_json(  # here I extract the .dat and write json
                     firstname=firstname,
                     lastname=lastname,
