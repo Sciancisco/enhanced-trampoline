@@ -67,8 +67,10 @@ class Server:
 
         # validation
         for i, athlete in enumerate(athlete_map.values()):
-            if len(athlete) != 2:
-                raise Exception(f"Athlete '{athlete}' invalid on line {i+1}. Must follow format 'firstname,lastname'.")
+            if len(athlete) == 1:
+                athlete.append("")  # if line contained only firstname
+            elif len(athlete) != 2:
+                raise Exception(f"Athlete '{athlete}' invalid on line {i+2}. Must follow format 'firstname,lastname'.")
 
         return athlete_map
 
@@ -190,7 +192,7 @@ class Server:
             except Exception as e:
                 self._logger.exception(str(e))
 
-        elif k == "space":
+        elif k == "space":  # not checking for "1" because it is used to change Qira's state, would cause double checks.
             self._qira_controller.refresh_state()
             self._logger.info(f"Pressed {k}, refreshing Qira's state.")
 
