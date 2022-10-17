@@ -1,7 +1,7 @@
 import os
 from string import Formatter
 
-from qira_parser import parse_qira_dat, write_routine_json
+from qira_parser import Routine
 
 
 class SaveDataError(Exception):
@@ -77,10 +77,10 @@ class SaveData:
             raise SaveDataError(f"Expected keywords {self._format_keywords}, got {set(kwargs.key())}.")
 
         filename_dat = self._qira_data_directory + os.sep + self._filename_format.format(**kwargs) + ".dat"
-        data = parse_qira_dat(filename_dat)
+        routine = Routine.from_dat_file(filename_dat)
 
         if os.path.isfile(self._gen_video_filename(**kwargs)):  # link video, if video there is
-            data["meta"]["video"] = self._filename_format.format(**kwargs) + "." + self._video_container
+            routine.set_meta("video", self._filename_format.format(**kwargs) + "." + self._video_container)
 
         filename_json = self._save_data_directory + os.sep + self._filename_format.format(**kwargs) + ".json"
-        write_routine_json(filename_json, data)
+        routine.to_json_file(filename_json)
